@@ -124,12 +124,13 @@ html,body{background:var(--bg)}
 }
 .week-day.active,.week-day.active .dn{color:#fff}
 .week-day.today-mark .dn{color:var(--accent)}
+.week-day.today-mark{position:relative}
 .week-day.today-mark::after{
-  content:"";display:block;width:18px;height:2px;border-radius:2px;
+  content:"";position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);
+  width:20px;height:3px;border-radius:3px;
   background:linear-gradient(90deg,var(--accent),var(--accent2));
-  margin:3px auto 0;
+  box-shadow:0 0 8px rgba(91,143,255,0.7);
 }
-.week-day.active::after{display:none}
 .week-range{text-align:center;font-size:11px;color:var(--text3);padding:0 14px 6px}
 
 /* TODAY BTN */
@@ -301,15 +302,15 @@ html,body{background:var(--bg)}
 .stat-label{font-size:12px;color:var(--text2);margin-top:4px}
 
 /* MODALS */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.0);z-index:300;display:none;align-items:flex-end;backdrop-filter:blur(0px);-webkit-backdrop-filter:blur(0px);transition:background .25s,backdrop-filter .25s}
-.overlay.open{background:rgba(0,0,0,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300;display:none;align-items:flex-end;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.overlay.open{display:flex}
 .overlay.open{display:flex}
 .modal{
   background:rgba(18,20,30,0.94);
   backdrop-filter:blur(32px) saturate(1.5);-webkit-backdrop-filter:blur(32px) saturate(1.5);
   border:1px solid var(--glass-border);border-top:1px solid rgba(255,255,255,0.2);
   border-radius:24px 24px 0 0;
-  padding:20px 20px calc(28px + env(safe-area-inset-bottom,0px));
+  padding:20px 20px calc(48px + env(safe-area-inset-bottom,0px));
   width:100%;max-height:90vh;overflow-y:auto;
   animation:slideUp .32s cubic-bezier(.4,0,.2,1);
   touch-action:pan-y;
@@ -393,6 +394,10 @@ textarea:focus{border-color:var(--accent)}
 .empty{text-align:center;padding:40px;color:var(--text3);font-size:14px;position:relative;z-index:1}
 .tab-content{display:none;position:relative;z-index:1}
 .tab-content.active{display:block}
+.hw-content-wrap{animation:fadeSlideIn .28s cubic-bezier(.4,0,.2,1)}
+@keyframes fadeSlideIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
+.hw-content-wrap.slide-left{animation:fadeSlideLeft .28s cubic-bezier(.4,0,.2,1)}
+@keyframes fadeSlideLeft{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:translateX(0)}}
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
 </style>
@@ -654,15 +659,21 @@ function renderWeekNav(){
 function hwKey(dk,i){return `w${weekOffset}_${dk}_${i}`;}
 function dayNoteKey(dk){return `w${weekOffset}_${dk}`;}
 
+let lastSelDay=-1;
 function renderHW(){
   if(!userGroup)return;
   const dk=DAYS[selDay],lessons=SCHEDULE[dk]||[];
-  const c=document.getElementById("hwContent");
-  if(!lessons.length){c.innerHTML='<div class="empty">Вихідний 🎉</div>';return;}
+  const cont=document.getElementById("hwContent");
+  if(!lessons.length){cont.innerHTML='<div class="empty">Вихідний 🎉</div>';lastSelDay=selDay;return;}
   const gi=getGI();
+  const goRight=selDay>lastSelDay||lastSelDay===-1;
+  lastSelDay=selDay;
+  const c=cont;
 
   // Use DocumentFragment for performance
   const frag=document.createDocumentFragment();
+  const wrap=document.createElement("div");
+  wrap.className="hw-content-wrap"+(goRight?"":" slide-left");
 
   // Day note card
   const dnKey=dayNoteKey(dk);
@@ -736,8 +747,9 @@ function renderHW(){
     body.appendChild(inner);card.appendChild(body);
     frag.appendChild(card);
   });
+  wrap.appendChild(frag);
   c.innerHTML="";
-  c.appendChild(frag);
+  c.appendChild(wrap);
 }
 
 window.openEditHW=function(dk,i,name,hw){
@@ -961,37 +973,67 @@ window.closeModal=function(id){
 
 // Swipe-down to close modals
 (function(){
-  let startY=0,dragging=false,currentModal=null;
-  document.addEventListener("touchstart",e=>{
-    const modal=e.target.closest(".modal");
-    if(!modal)return;
-    const overlay=modal.closest(".overlay");
-    if(!overlay||!overlay.classList.contains("open"))return;
+  let startY=0,startScrollTop=0,dragging=false,currentModal=null,currentOverlay=null;
+
+  function onTouchStart(e){
+    const modal=e.currentTarget;
     startY=e.touches[0].clientY;
-    dragging=true;currentModal=modal;
-    modal.style.transition="none";
-  },{passive:true});
-  document.addEventListener("touchmove",e=>{
-    if(!dragging||!currentModal)return;
-    const dy=Math.max(0,e.touches[0].clientY-startY);
-    currentModal.style.transform=`translateY(${dy}px)`;
-    const overlay=currentModal.closest(".overlay");
-    if(overlay)overlay.style.background=`rgba(0,0,0,${Math.max(0,0.55-dy/400)})`;
-  },{passive:true});
-  document.addEventListener("touchend",e=>{
-    if(!dragging||!currentModal)return;
+    startScrollTop=modal.scrollTop;
     dragging=false;
+    currentModal=modal;
+    currentOverlay=modal.closest(".overlay");
+  }
+  function onTouchMove(e){
+    if(!currentModal)return;
+    const dy=e.touches[0].clientY-startY;
+    // Only drag down if at top of scroll
+    if(dy>8&&currentModal.scrollTop<=0){
+      dragging=true;
+      const pull=Math.max(0,dy);
+      currentModal.style.transform=`translateY(${pull}px)`;
+      currentModal.style.transition="none";
+      if(currentOverlay)currentOverlay.style.background=`rgba(0,0,0,${Math.max(0,0.55*(1-pull/300))})`;
+    }
+  }
+  function onTouchEnd(e){
+    if(!currentModal)return;
     const dy=e.changedTouches[0].clientY-startY;
-    if(dy>80){
-      const overlay=currentModal.closest(".overlay");
-      if(overlay)closeModal(overlay.id);
+    if(dragging&&dy>90){
+      // Close
+      currentModal.style.transition="transform .25s cubic-bezier(.4,0,.2,1)";
+      currentModal.style.transform="translateY(100%)";
+      if(currentOverlay){
+        currentOverlay.style.transition="background .25s";
+        currentOverlay.style.background="rgba(0,0,0,0)";
+      }
+      const ov=currentOverlay;
+      setTimeout(()=>{
+        if(ov){ov.classList.remove("open");ov.style.background="";ov.style.transition="";}
+        if(currentModal){currentModal.style.transform="";currentModal.style.transition="";}
+      },260);
     } else {
-      currentModal.style.transition="transform .2s";
+      // Snap back
+      currentModal.style.transition="transform .2s cubic-bezier(.4,0,.2,1)";
       currentModal.style.transform="";
+      if(currentOverlay){currentOverlay.style.background="";}
       setTimeout(()=>{if(currentModal)currentModal.style.transition="";},200);
     }
-    currentModal=null;
-  },{passive:true});
+    dragging=false;currentModal=null;currentOverlay=null;
+  }
+
+  // Attach to all modals after DOM ready
+  function attachSwipe(){
+    document.querySelectorAll(".modal").forEach(m=>{
+      m.removeEventListener("touchstart",onTouchStart);
+      m.removeEventListener("touchmove",onTouchMove);
+      m.removeEventListener("touchend",onTouchEnd);
+      m.addEventListener("touchstart",onTouchStart,{passive:true});
+      m.addEventListener("touchmove",onTouchMove,{passive:true});
+      m.addEventListener("touchend",onTouchEnd,{passive:true});
+    });
+  }
+  document.addEventListener("DOMContentLoaded",attachSwipe);
+  setTimeout(attachSwipe,500);
 })();
 
 // ── LIGHTBOX ──
