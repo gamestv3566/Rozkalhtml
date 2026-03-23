@@ -14,18 +14,24 @@
   twa.setBackgroundColor('#0a0c12');
   twa.setHeaderColor('#0a0c12');
   if(twa.setBottomBarColor)twa.setBottomBarColor('#0a0c12');
-  // Apply safe area insets from Telegram
+  if(twa.requestFullscreen)try{twa.requestFullscreen();}catch(e){}
+
   function applyInsets(){
     var si=twa.safeAreaInset||{top:0,bottom:0,left:0,right:0};
     var csi=twa.contentSafeAreaInset||{top:0,bottom:0,left:0,right:0};
+    // Use the larger of the two insets for safety
     var topInset=Math.max(si.top||0, csi.top||0);
     var bottomInset=Math.max(si.bottom||0, csi.bottom||0);
+    // Clamp: min 0, max 80px so it never goes crazy on any device
+    topInset=Math.min(Math.max(topInset,0),80);
+    bottomInset=Math.min(Math.max(bottomInset,0),80);
     document.documentElement.style.setProperty('--tg-top', topInset+'px');
     document.documentElement.style.setProperty('--tg-bottom', bottomInset+'px');
   }
   applyInsets();
   twa.onEvent('safeAreaChanged', applyInsets);
   twa.onEvent('contentSafeAreaChanged', applyInsets);
+  twa.onEvent('viewportChanged', applyInsets);
 })();
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
@@ -67,7 +73,11 @@ body::before{
   backdrop-filter:blur(24px) saturate(1.6);
   -webkit-backdrop-filter:blur(24px) saturate(1.6);
   border-bottom:1px solid var(--glass-border);
-  padding:calc(10px + var(--tg-top, 0px)) 16px 10px;display:flex;align-items:center;gap:12px;
+  padding-top:calc(10px + var(--tg-top, 0px));
+  padding-bottom:10px;
+  padding-left:16px;
+  padding-right:16px;
+  display:flex;align-items:center;gap:12px;
   box-sizing:border-box;
 }
 .logo-img{width:42px;height:42px;border-radius:12px;object-fit:cover;flex-shrink:0;
@@ -96,7 +106,7 @@ html,body{background:var(--bg)}
 /* BOTTOM NAV - liquid glass */
 .bottom-nav{
   position:fixed;
-  bottom:calc(16px + var(--tg-bottom, env(safe-area-inset-bottom, 0px)));
+  bottom:calc(clamp(8px, 3vw, 20px) + var(--tg-bottom, 0px));
   left:50%;transform:translateX(-50%);
   z-index:200;
   background:rgba(14,16,26,0.88);
@@ -111,8 +121,8 @@ html,body{background:var(--bg)}
 /* Bottom fade for Telegram Mini App */
 body::after{
   content:"";position:fixed;bottom:0;left:0;right:0;
-  height:calc(80px + var(--tg-bottom, 0px));
-  background:linear-gradient(to top,rgba(10,12,18,1) 0%,rgba(10,12,18,0.7) 50%,transparent 100%);
+  height:calc(90px + var(--tg-bottom, 0px));
+  background:linear-gradient(to top,var(--bg) 0%,rgba(10,12,18,0.75) 55%,transparent 100%);
   z-index:199;pointer-events:none;
 }
 .nav-item{
@@ -178,7 +188,7 @@ body::after{
 .today-fab:active{transform:scale(0.9)}
 
 /* CONTENT */
-.content{padding:10px 14px calc(130px + var(--tg-bottom, env(safe-area-inset-bottom, 0px)));position:relative;z-index:1}
+.content{padding:10px 14px calc(110px + var(--tg-bottom, 0px));position:relative;z-index:1}
 
 /* HW CARD */
 .hw-card{
@@ -219,9 +229,9 @@ body::after{
 .hw-card.has-hw .hw-dot{display:block}
 .hw-chevron{color:var(--text3);transition:transform .25s;font-size:11px;flex-shrink:0}
 .hw-card.open .hw-chevron{transform:rotate(180deg)}
-.hw-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .2s cubic-bezier(.4,0,.2,1)}
+.hw-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .25s cubic-bezier(.4,0,.2,1)}
 .hw-body>div{overflow:hidden;min-height:0}
-.hw-body-inner{padding:0 14px 14px;min-height:0}
+.hw-body-inner{padding:0 14px 14px}
 .hw-card.open .hw-body{grid-template-rows:1fr}
 .hw-text{
   background:rgba(255,255,255,0.04);
@@ -230,7 +240,11 @@ body::after{
   padding:11px 13px;font-size:14px;line-height:1.65;
   white-space:pre-wrap;word-break:break-word;
 }
-.hw-empty{font-size:13px;color:var(--text3);font-style:italic;padding:8px 0 4px;display:block;white-space:normal;word-break:break-word;}
+.hw-empty{
+  font-size:13px;color:var(--text3);font-style:italic;
+  padding:6px 2px 10px;display:block;
+  white-space:normal;word-break:break-word;line-height:1.5;
+}
 .hw-photos{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:8px}
 .hw-photo{aspect-ratio:1;border-radius:var(--radius-sm);object-fit:cover;width:100%;cursor:pointer}
 .edit-btn{
