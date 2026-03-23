@@ -218,14 +218,10 @@ body::after{
 .hw-card.has-hw .hw-dot{display:block}
 .hw-chevron{color:var(--text3);transition:transform .25s;font-size:11px;flex-shrink:0}
 .hw-card.open .hw-chevron{transform:rotate(180deg)}
-.hw-body{
-  display:grid;
-  grid-template-rows:0fr;
-  overflow:hidden;
-  transition:grid-template-rows .22s cubic-bezier(.4,0,.2,1);
-}
-.hw-body-inner{padding:0 14px 14px;min-height:0}
-.hw-card.open .hw-body{grid-template-rows:1fr}
+.hw-body{height:0;overflow:hidden;transition:height .25s cubic-bezier(.4,0,.2,1)}
+.hw-body-inner{padding:0 14px 14px;opacity:0;transition:opacity .15s .05s}
+.hw-card.open .hw-body{height:auto}
+.hw-card.open .hw-body-inner{opacity:1}
 .hw-text{
   background:rgba(255,255,255,0.04);
   border:1px solid var(--glass-border);
@@ -233,7 +229,7 @@ body::after{
   padding:11px 13px;font-size:14px;line-height:1.65;
   white-space:pre-wrap;word-break:break-word;
 }
-.hw-empty{font-size:13px;color:var(--text3);font-style:italic}
+.hw-empty{font-size:13px;color:var(--text3);font-style:italic;display:block}
 .hw-photos{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:8px}
 .hw-photo{aspect-ratio:1;border-radius:var(--radius-sm);object-fit:cover;width:100%;cursor:pointer}
 .edit-btn{
@@ -623,6 +619,29 @@ textarea:focus{border-color:var(--accent)}
     </div>
   </div>
 </div>
+<!-- BULK HW MODAL -->
+<div class="overlay" id="bulkModal" onclick="closeOutside(event,'bulkModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📥 Масовий ввід Д/З</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.7;background:rgba(255,255,255,0.04);border-radius:10px;padding:10px 12px">
+      <b style="color:var(--text)">Синтаксис</b> — кожен рядок окремо:<br>
+      <code style="color:var(--accent)">пн 1: текст завдання</code><br>
+      <code style="color:var(--accent)">вт 3: вивчити слова</code><br><br>
+      <span style="color:var(--text3)">Дні:</span> пн вт ср чт пт<br>
+      <span style="color:var(--text3)">Урок:</span> 1–7<br>
+      <span style="color:var(--text3)">Тиждень:</span> поточний
+    </div>
+    <div class="modal-label">Вставте текст</div>
+    <textarea id="bulkInput" rows="9" placeholder="пн 1: Прочитати параграф 5&#10;пн 2: Задачі 1-10&#10;вт 3: Вивчити слова&#10;ср 1: Написати твір&#10;чт 5: Повторити теорему"></textarea>
+    <div id="bulkPreview" style="margin-top:8px;font-size:12px;color:var(--accent);display:none"></div>
+    <div class="modal-actions">
+      <button class="btn" style="background:rgba(255,255,255,0.08);color:var(--text2);border:1px solid var(--glass-border)" onclick="parseBulkPreview()">👁 Перевірити</button>
+      <button class="btn btn-primary" onclick="saveBulkHW()">💾 Зберегти все</button>
+    </div>
+  </div>
+</div>
+
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
   <button class="lb-close">✕</button>
@@ -845,7 +864,20 @@ function renderHW(){
       </div>
       <div class="hw-dot"></div>
       <div class="hw-chevron">⌄</div>`;
-    header.onclick=()=>card.classList.toggle("open");
+    header.onclick=()=>{
+  const wasOpen=card.classList.contains("open");
+  const body=card.querySelector(".hw-body");
+  const inner=card.querySelector(".hw-body-inner");
+  if(wasOpen){
+    body.style.height=body.scrollHeight+"px";
+    requestAnimationFrame(()=>{body.style.height="0px";});
+    card.classList.remove("open");
+  } else {
+    card.classList.add("open");
+    body.style.height=inner.scrollHeight+"px";
+    body.addEventListener("transitionend",function h(){body.style.height="auto";body.removeEventListener("transitionend",h);});
+  }
+};
     card.appendChild(header);
 
     const body=document.createElement("div");body.className="hw-body";
@@ -868,6 +900,13 @@ function renderHW(){
   wrap.appendChild(frag);
   c.innerHTML="";
   c.appendChild(wrap);
+  // Встановити height для вже відкритих карток
+  requestAnimationFrame(()=>{
+    c.querySelectorAll(".hw-card.open .hw-body").forEach(body=>{
+      const inner=body.querySelector(".hw-body-inner");
+      if(inner&&body.style.height==="")body.style.height="auto";
+    });
+  });
 }
 
 window.openEditHW=function(dk,i,name,hw){
@@ -1103,6 +1142,10 @@ async function showAdminStats(){
         <div class="stat-card"><div class="stat-num">${hwCount}</div><div class="stat-label">Записів Д/З</div></div>
         <div class="stat-card"><div class="stat-num">${dnCount}</div><div class="stat-label">Нотаток</div></div>
         <div class="stat-card" style="grid-column:1/-1"><div class="stat-num">${schCount}</div><div class="stat-label">Кабінетів/вчителів вказано</div></div>
+        <div class="stat-card" style="grid-column:1/-1;cursor:pointer;border-color:rgba(91,143,255,0.3);background:rgba(91,143,255,0.08)" onclick="closeModal('loginModal');setTimeout(()=>document.getElementById('bulkModal').classList.add('open'),100)">
+          <div style="font-size:22px;margin-bottom:4px">📥</div>
+          <div class="stat-label" style="font-size:13px;color:var(--accent)">Масовий ввід Д/З</div>
+        </div>
       </div>`;
   } catch(e){area.innerHTML='<div style="color:var(--text3);font-size:12px;text-align:center">Не вдалось завантажити</div>';}
 }
@@ -1199,6 +1242,99 @@ window.closeModal=function(id){
   },{passive:true});
 })();
 
+
+
+// ── BULK HW IMPORT ──
+const DAYS_MAP={
+  'пн':'пн','вт':'вт','ср':'ср','чт':'чт','пт':'пт',
+  'понеділок':'пн','вівторок':'вт','середа':'ср','четвер':'чт',"п'ятниця":'пт',
+  'пон':'пн','пнд':'пн','вів':'вт','сер':'ср','чтв':'чт','птн':'пт',
+  'mon':'пн','tue':'вт','wed':'ср','thu':'чт','fri':'пт',
+  'monday':'пн','tuesday':'вт','wednesday':'ср','thursday':'чт','friday':'пт',
+  '1':'пн','2':'вт','3':'ср','4':'чт','5':'пт'
+};
+
+function parseBulk(text){
+  const lines=text.trim().split('\n');
+  const result=[];
+  let curDay=null;
+  for(const raw of lines){
+    const line=raw.trim();
+    if(!line||line.startsWith('#'))continue;
+
+    // Блочний синтаксис "пн:" — встановлює поточний день
+    const dayOnly=line.match(/^([а-яa-z']+):?$/i);
+    if(dayOnly){
+      const dk=DAYS_MAP[dayOnly[1].toLowerCase().replace(':','')];
+      if(dk){curDay=dk;continue;}
+    }
+
+    // "  1: текст" в блочному режимі
+    const blockLine=line.match(/^(\d)\s*[:.]\s*(.+)$/);
+    if(blockLine&&curDay){
+      const lessonNum=parseInt(blockLine[1]);
+      const hw=blockLine[2].trim();
+      if(lessonNum>=1&&lessonNum<=7)result.push({dk:curDay,lessonNum,hw,raw:line});
+      else result.push({error:true,raw:line});
+      continue;
+    }
+
+    // Inline: "пн 3: текст" або "пн3: текст"
+    const m=line.match(/^([а-яa-z']{2,})\s*(\d)\s*[:.]\s*(.+)$/i);
+    if(m){
+      const dk=DAYS_MAP[m[1].toLowerCase()];
+      const lessonNum=parseInt(m[2]);
+      const hw=m[3].trim();
+      if(dk&&lessonNum>=1&&lessonNum<=7){result.push({dk,lessonNum,hw,raw:line});continue;}
+    }
+
+    result.push({error:true,raw:line});
+  }
+  return result;
+}
+
+window.parseBulkPreview=function(){
+  const text=document.getElementById('bulkInput').value;
+  const parsed=parseBulk(text);
+  const ok=parsed.filter(x=>!x.error);
+  const bad=parsed.filter(x=>x.error);
+  const prev=document.getElementById('bulkPreview');
+  prev.style.display='block';
+  let html=`<b style="color:var(--green)">✅ Розпізнано: ${ok.length}</b>`;
+  if(bad.length)html+=`&nbsp;&nbsp;<b style="color:var(--red)">❌ Помилок: ${bad.length}</b>`;
+  if(ok.length){
+    html+='<div style="margin-top:6px;max-height:120px;overflow-y:auto">';
+    ok.forEach(x=>html+=`<div style="color:var(--text2)">→ <b>${x.dk}</b> ур.${x.lessonNum}: ${x.hw.substring(0,40)}</div>`);
+    html+='</div>';
+  }
+  if(bad.length){
+    html+='<div style="margin-top:4px;color:var(--red)">';
+    bad.forEach(x=>html+=`<div>✗ ${x.raw}</div>`);
+    html+='</div>';
+  }
+  prev.innerHTML=html;
+};
+
+window.saveBulkHW=async function(){
+  const text=document.getElementById('bulkInput').value;
+  const parsed=parseBulk(text);
+  const ok=parsed.filter(x=>!x.error);
+  if(!ok.length){alert('Немає що зберігати. Перевір синтаксис.');return;}
+  
+  let saved=0;
+  for(const item of ok){
+    const key=`w${weekOffset}_${item.dk}_${item.lessonNum-1}`;
+    const existing=hwData[key]||{};
+    await set(ref(db,`hw/${key}`),{text:item.hw,photos:existing.photos||[]});
+    saved++;
+  }
+  
+  const prev=document.getElementById('bulkPreview');
+  prev.style.display='block';
+  prev.innerHTML=`<b style="color:var(--green)">✅ Збережено ${saved} записів!</b>`;
+  
+  setTimeout(()=>closeModal('bulkModal'),1200);
+};
 
 function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>");}
 window.dismissGroupOverlay=function(e){
