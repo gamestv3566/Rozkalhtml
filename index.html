@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#0a0c12">
+<title>Щоденник 9-А</title>
+<script>
+// Telegram WebApp support
+(function(){
+  if(!window.Telegram||!window.Telegram.WebApp)return;
+  var twa=window.Telegram.WebApp;
+  twa.expand();
+  twa.setBackgroundColor('#0a0c12');
+  twa.setHeaderColor('#0a0c12');
+  if(twa.setBottomBarColor)twa.setBottomBarColor('#0a0c12');
+  // Apply safe area insets from Telegram
+  function applyInsets(){
+    var si=twa.safeAreaInset||{top:0,bottom:0,left:0,right:0};
+    var csi=twa.contentSafeAreaInset||{top:0,bottom:0,left:0,right:0};
+    var topInset=Math.max(si.top||0, csi.top||0);
+    var bottomInset=Math.max(si.bottom||0, csi.bottom||0);
+    document.documentElement.style.setProperty('--tg-top', topInset+'px');
+    document.documentElement.style.setProperty('--tg-bottom', bottomInset+'px');
+  }
+  applyInsets();
+  twa.onEvent('safeAreaChanged', applyInsets);
+  twa.onEvent('contentSafeAreaChanged', applyInsets);
+})();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0c12;
+  --tg-top:0px;
+  --tg-bottom:0px;--surface:rgba(255,255,255,0.06);--surface2:rgba(255,255,255,0.04);
+  --surface3:rgba(255,255,255,0.10);--glass:rgba(255,255,255,0.08);
+  --glass-border:rgba(255,255,255,0.14);--glass-hover:rgba(255,255,255,0.12);
+  --accent:#5b8fff;--accent2:#8b6fff;--red:#ff5577;--green:#3ecf8e;
+  --text:#f0f2f8;--text2:#9099b4;--text3:#4a5270;--radius:18px;--radius-sm:12px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%;background:var(--bg)}body{min-height:100%;background:var(--bg);color:var(--text);font-family:"Golos Text",sans-serif;overflow-x:hidden;overflow-y:auto}
+
+/* Background mesh */
+body::before{
+  content:"";position:fixed;inset:0;z-index:0;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 10%, rgba(91,143,255,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(139,111,255,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 50% 50%, rgba(62,207,142,0.04) 0%, transparent 70%);
+  pointer-events:none;
+}
+
+/* GLASS MIXIN */
+.glass{
+  background:var(--glass);
+  backdrop-filter:blur(20px) saturate(1.4);
+  -webkit-backdrop-filter:blur(20px) saturate(1.4);
+  border:1px solid var(--glass-border);
+}
+
+/* HEADER */
+.header{
+  position:sticky;top:0;z-index:100;
+  background:rgba(10,12,18,0.85);
+  backdrop-filter:blur(24px) saturate(1.6);
+  -webkit-backdrop-filter:blur(24px) saturate(1.6);
+  border-bottom:1px solid var(--glass-border);
+  padding:calc(10px + var(--tg-top, 0px)) 16px 10px;display:flex;align-items:center;gap:12px;
+  box-sizing:border-box;
+}
+.logo-img{width:42px;height:42px;border-radius:12px;object-fit:cover;flex-shrink:0;
+  box-shadow:0 2px 12px rgba(91,143,255,0.3);}
+.header-text{}
+.header-title{font-family:"Unbounded",sans-serif;font-size:13px;font-weight:600;line-height:1.2}
+.header-sub{font-size:11px;color:var(--text2);margin-top:1px}
+.header-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.admin-badge{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;display:none;
+}
+.admin-badge.on{display:block}
+.icon-btn{
+  width:36px;height:36px;border-radius:10px;
+  background:rgba(255,255,255,0.07);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border:1px solid var(--glass-border);
+  color:var(--text2);font-size:15px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:background .2s;
+}
+.icon-btn:active{background:rgba(255,255,255,0.14)}
+
+/* Transparent system nav bar */
+html,body{background:var(--bg)}
+/* BOTTOM NAV - liquid glass */
+.bottom-nav{
+  position:fixed;
+  bottom:calc(24px + var(--tg-bottom, 0px));
+  left:50%;transform:translateX(-50%);
+  z-index:200;
+  background:rgba(14,16,26,0.88);
+  backdrop-filter:blur(32px) saturate(2);
+  -webkit-backdrop-filter:blur(32px) saturate(2);
+  border:1px solid rgba(255,255,255,0.16);
+  border-radius:32px;
+  padding:6px 8px;
+  display:flex;gap:2px;
+  box-shadow:0 8px 40px rgba(0,0,0,0.6),0 1px 0 rgba(255,255,255,0.12) inset,0 0 0 1px rgba(255,255,255,0.06);
+}
+/* Bottom fade for Telegram context */
+body::after{
+  content:"";position:fixed;bottom:0;left:0;right:0;height:90px;
+  background:linear-gradient(to top,rgba(10,12,18,0.95) 0%,transparent 100%);
+  z-index:199;pointer-events:none;
+}
+.nav-item{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:8px 22px;border-radius:26px;cursor:pointer;
+  color:var(--text2);font-size:11px;font-weight:500;
+  transition:all .22s cubic-bezier(.4,0,.2,1);
+  white-space:nowrap;
+}
+.nav-item .nav-icon{font-size:22px;line-height:1;transition:transform .22s,filter .22s}
+.nav-item.active{
+  background:rgba(91,143,255,0.2);
+  color:var(--accent);
+  box-shadow:0 0 0 1px rgba(91,143,255,0.35) inset;
+}
+.nav-item.active .nav-icon{transform:scale(1.18);filter:drop-shadow(0 0 6px rgba(91,143,255,0.6))}
+.nav-item:active .nav-icon{transform:scale(0.88)}
+
+/* WEEK NAV */
+.week-nav{display:flex;align-items:center;padding:10px 14px;gap:6px}
+.week-arrow{
+  width:30px;height:30px;border-radius:50%;
+  background:rgba(255,255,255,0.07);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border:1px solid var(--glass-border);
+  color:var(--text2);font-size:17px;cursor:pointer;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.week-days{display:flex;gap:4px;flex:1;justify-content:center}
+.week-day{
+  display:flex;flex-direction:column;align-items:center;
+  padding:5px 8px;border-radius:var(--radius-sm);
+  cursor:pointer;min-width:40px;font-size:11px;color:var(--text2);
+  transition:all .2s;
+}
+.week-day .dn{font-family:"Unbounded",sans-serif;font-size:14px;font-weight:600;color:var(--text);margin-top:2px}
+.week-day.active{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  box-shadow:0 4px 14px rgba(91,143,255,0.35);
+}
+.week-day.active,.week-day.active .dn{color:#fff}
+.week-day.today-mark .dn{color:var(--accent)}
+.week-day.today-mark{position:relative}
+.week-day.today-mark::after{
+  content:"";position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);
+  width:20px;height:3px;border-radius:3px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  box-shadow:0 0 8px rgba(91,143,255,0.7);
+}
+.week-range{text-align:center;font-size:11px;color:var(--text3);padding:0 14px 6px}
+
+/* TODAY BTN */
+.today-fab{
+  position:fixed;bottom:90px;right:16px;z-index:150;
+  width:42px;height:42px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border:none;color:#fff;font-size:18px;cursor:pointer;
+  box-shadow:0 4px 16px rgba(91,143,255,0.45);
+  display:none;align-items:center;justify-content:center;
+  transition:transform .2s;
+}
+.today-fab.visible{display:flex}
+.today-fab:active{transform:scale(0.9)}
+
+/* CONTENT */
+.content{padding:10px 14px calc(140px + var(--tg-bottom, 0px));position:relative;z-index:1}
+
+/* HW CARD */
+.hw-card{
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius);margin-bottom:8px;
+  transition:border-color .2s;
+  animation:fadeInUp .3s both;
+}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.hw-card:nth-child(1){animation-delay:.02s}
+.hw-card:nth-child(2){animation-delay:.06s}
+.hw-card:nth-child(3){animation-delay:.10s}
+.hw-card:nth-child(4){animation-delay:.13s}
+.hw-card:nth-child(5){animation-delay:.16s}
+.hw-card:nth-child(6){animation-delay:.19s}
+.hw-card:nth-child(7){animation-delay:.22s}
+.hw-card:nth-child(8){animation-delay:.25s}
+.hw-card.has-hw{border-color:rgba(91,143,255,0.3)}
+.hw-header{
+  padding:13px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;
+  -webkit-user-select:none;user-select:none;
+}
+.hw-num{
+  width:28px;height:28px;border-radius:8px;
+  background:rgba(255,255,255,0.07);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:600;color:var(--text2);flex-shrink:0;
+}
+.hw-card.has-hw .hw-num{
+  background:rgba(91,143,255,0.18);color:var(--accent);
+}
+.hw-meta{flex:1;min-width:0}
+.hw-subject{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hw-time{font-size:11px;color:var(--text3)}
+.hw-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);display:none;flex-shrink:0}
+.hw-card.has-hw .hw-dot{display:block}
+.hw-chevron{color:var(--text3);transition:transform .25s;font-size:11px;flex-shrink:0}
+.hw-card.open .hw-chevron{transform:rotate(180deg)}
+.hw-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .2s cubic-bezier(.4,0,.2,1)}
+.hw-body>div{overflow:hidden;min-height:0}
+.hw-body-inner{padding:0 14px 14px;min-height:0}
+.hw-card.open .hw-body{grid-template-rows:1fr}
+.hw-text{
+  background:rgba(255,255,255,0.04);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius-sm);
+  padding:11px 13px;font-size:14px;line-height:1.65;
+  white-space:pre-wrap;word-break:break-word;
+}
+.hw-empty{font-size:13px;color:var(--text3);font-style:italic;padding:4px 0 8px;display:block}
+.hw-photos{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:8px}
+.hw-photo{aspect-ratio:1;border-radius:var(--radius-sm);object-fit:cover;width:100%;cursor:pointer}
+.edit-btn{
+  margin-top:10px;width:100%;padding:9px;
+  background:rgba(255,255,255,0.07);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius-sm);
+  color:var(--text2);font-size:13px;cursor:pointer;font-family:inherit;
+}
+
+/* DAY NOTE CARD */
+.day-note-card{
+  background:rgba(91,143,255,0.08);
+  border:1px solid rgba(91,143,255,0.2);
+  border-radius:var(--radius);margin-bottom:12px;padding:14px;
+}
+.day-note-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.day-note-title{font-weight:600;font-size:13px;color:var(--accent)}
+.day-note-text{font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
+.day-note-empty{font-size:13px;color:var(--text3);font-style:italic;line-height:1.4}
+
+/* SCHEDULE */
+.sch-day-header{
+  font-family:"Unbounded",sans-serif;font-size:11px;font-weight:600;
+  color:var(--text3);text-transform:uppercase;letter-spacing:.5px;padding:14px 0 8px;
+}
+.sch-card{
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius);margin-bottom:7px;padding:13px 14px;
+  display:flex;align-items:flex-start;gap:12px;
+}
+.sch-card.now{
+  background:rgba(91,143,255,0.1);border-color:rgba(91,143,255,0.4);
+  box-shadow:0 0 0 1px rgba(91,143,255,0.2) inset;
+}
+.sch-num{
+  width:30px;height:30px;border-radius:9px;
+  background:rgba(255,255,255,0.07);
+  display:flex;align-items:center;justify-content:center;
+  font-family:"Unbounded",sans-serif;font-size:12px;font-weight:700;
+  color:var(--text2);flex-shrink:0;
+}
+.sch-card.now .sch-num{background:var(--accent);color:#fff}
+.sch-info{flex:1}
+.sch-name{font-weight:600;font-size:14px}
+.sch-time{font-size:11px;color:var(--text3);margin-top:2px}
+.sch-extra{font-size:12px;color:var(--text2);margin-top:5px;display:flex;gap:10px;flex-wrap:wrap}
+.sch-edit-row{margin-top:8px;display:none;gap:6px}
+.admin-mode .sch-edit-row{display:flex}
+.sch-input{
+  flex:1;background:rgba(255,255,255,0.06);
+  border:1px solid var(--glass-border);
+  border-radius:8px;color:var(--text);font-family:inherit;font-size:12px;padding:7px 10px;outline:none;
+}
+.sch-input:focus{border-color:var(--accent)}
+.sch-save{
+  padding:7px 12px;background:var(--accent);color:#fff;
+  border:none;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:600;
+}
+.sch-badge{
+  font-size:10px;font-weight:700;color:var(--accent);
+  background:rgba(91,143,255,0.15);padding:2px 8px;border-radius:20px;flex-shrink:0;margin-top:2px;
+}
+
+/* SCHEDULE DAY SELECTOR */
+.sch-day-tabs{
+  display:flex;gap:6px;padding:12px 14px 0;overflow-x:auto;scrollbar-width:none;
+}
+.sch-day-tabs::-webkit-scrollbar{display:none}
+.sch-day-tab{
+  flex-shrink:0;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:500;
+  color:var(--text2);cursor:pointer;
+  background:rgba(255,255,255,0.06);border:1px solid var(--glass-border);
+  transition:all .2s;
+}
+.sch-day-tab.active{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;border-color:transparent;
+  box-shadow:0 3px 12px rgba(91,143,255,0.35);
+}
+
+/* BELLS */
+.bell-card{
+  background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:1px solid var(--glass-border);border-radius:var(--radius);
+  margin-bottom:7px;padding:13px 14px;display:flex;align-items:center;gap:14px;
+}
+.bell-num{font-family:"Unbounded",sans-serif;font-size:20px;font-weight:700;color:var(--accent);width:26px;text-align:center;flex-shrink:0}
+.bell-range{font-size:15px;font-weight:600}
+.bell-dur{font-size:11px;color:var(--text3);margin-top:2px}
+
+/* ADMIN STATS */
+.stat-card{
+  background:rgba(255,255,255,0.05);border:1px solid var(--glass-border);
+  border-radius:var(--radius);padding:14px;margin-bottom:8px;
+}
+.stat-num{font-family:"Unbounded",sans-serif;font-size:28px;font-weight:700;color:var(--accent)}
+.stat-label{font-size:12px;color:var(--text2);margin-top:4px}
+
+/* MODALS */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300;display:none;align-items:flex-end;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.overlay.open{display:flex}
+.overlay.open{display:flex}
+.modal{
+  background:rgba(18,20,30,0.94);
+  backdrop-filter:blur(32px) saturate(1.5);-webkit-backdrop-filter:blur(32px) saturate(1.5);
+  border:1px solid var(--glass-border);border-top:1px solid rgba(255,255,255,0.2);
+  border-radius:24px 24px 0 0;
+  padding:20px 20px calc(80px + var(--tg-bottom, 0px));
+  width:100%;max-height:min(90vh,90dvh);overflow-y:auto;
+  animation:slideUp .32s cubic-bezier(.4,0,.2,1);
+  touch-action:pan-y;
+}
+@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes fadeInScale{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+.modal-handle{width:40px;height:4px;border-radius:2px;background:rgba(255,255,255,0.15);margin:0 auto 18px}
+.modal-title{font-family:"Unbounded",sans-serif;font-size:15px;font-weight:600;margin-bottom:14px}
+.modal-label{font-size:12px;color:var(--text2);margin-bottom:5px;margin-top:12px;font-weight:500}
+textarea{
+  width:100%;background:rgba(255,255,255,0.06);
+  border:1px solid var(--glass-border);border-radius:var(--radius-sm);
+  color:var(--text);font-family:inherit;font-size:14px;padding:11px 13px;
+  resize:none;outline:none;line-height:1.65;
+}
+textarea:focus{border-color:var(--accent)}
+.m-input{
+  width:100%;background:rgba(255,255,255,0.06);
+  border:1px solid var(--glass-border);border-radius:var(--radius-sm);
+  color:var(--text);font-family:inherit;font-size:15px;padding:13px;
+  outline:none;text-align:center;letter-spacing:3px;
+}
+.m-input:focus{border-color:var(--accent)}
+.m-error{font-size:12px;color:var(--red);text-align:center;margin-top:8px;display:none}
+.file-drop{
+  width:100%;background:rgba(255,255,255,0.04);
+  border:1px solid var(--glass-border);border-radius:var(--radius-sm);
+  padding:18px;display:flex;flex-direction:column;align-items:center;
+  gap:4px;cursor:pointer;color:var(--text2);font-size:13px;
+  transition:border-color .2s;
+}
+.file-drop:hover{border-color:var(--accent)}
+.file-drop.hidden{display:none}
+.add-more-btn{
+  margin-top:8px;padding:7px 14px;
+  background:rgba(91,143,255,0.12);
+  border:1px solid rgba(91,143,255,0.25);
+  border-radius:8px;color:var(--accent);
+  font-family:inherit;font-size:12px;cursor:pointer;
+}
+.photo-preview{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:8px}
+.pp-item{position:relative;aspect-ratio:1}
+.pp-item img{width:100%;height:100%;object-fit:cover;border-radius:var(--radius-sm)}
+.pp-rm{position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:var(--red);color:#fff;font-size:10px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.modal-actions{display:flex;gap:8px;margin-top:16px}
+.btn{flex:1;padding:13px;border-radius:var(--radius-sm);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:opacity .15s}
+.btn:active{opacity:.8}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn-danger{background:rgba(255,85,119,0.15);color:var(--red);flex:0 0 auto;padding:13px 14px;border:1px solid rgba(255,85,119,0.2)}
+#fileInput,#dayNoteFile{display:none}
+
+/* GROUP OVERLAY */
+.group-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.group-overlay.hidden{display:none}
+.group-modal{
+  background:rgba(18,20,30,0.92);backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);
+  border:1px solid var(--glass-border);
+  border-radius:24px;padding:28px 24px;width:calc(100% - 48px);max-width:340px;text-align:center;
+}
+.group-title{font-family:"Unbounded",sans-serif;font-size:16px;font-weight:700;margin-bottom:6px}
+.group-sub{font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.5}
+.group-btns{display:flex;gap:10px}
+.group-btn{
+  flex:1;padding:16px;border-radius:var(--radius-sm);
+  border:1px solid var(--glass-border);
+  background:rgba(255,255,255,0.07);
+  color:var(--text);font-family:"Unbounded",sans-serif;font-size:13px;font-weight:600;cursor:pointer;
+  transition:all .2s;
+}
+.group-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(91,143,255,0.1)}
+
+/* LIGHTBOX */
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:400;display:none;align-items:center;justify-content:center}
+.lightbox.open{display:flex}
+.lightbox img{max-width:95vw;max-height:90vh;border-radius:8px}
+.lb-close{position:fixed;top:16px;right:16px;background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);border:1px solid var(--glass-border);color:var(--text);width:38px;height:38px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+.loading{text-align:center;padding:40px;color:var(--text3);font-size:14px;position:relative;z-index:1}
+.spinner{width:32px;height:32px;border:3px solid rgba(255,255,255,0.1);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:40px;color:var(--text3);font-size:14px;position:relative;z-index:1}
+.tab-wrapper{position:relative;overflow:hidden}
+.tab-content{display:none;position:relative;z-index:1;width:100%}
+.tab-content.active{display:block}
+.hw-content-wrap{animation:fadeSlideIn .26s cubic-bezier(.4,0,.2,1)}
+@keyframes fadeSlideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+.hw-content-wrap.slide-left{animation:fadeSlideLeft .26s cubic-bezier(.4,0,.2,1)}
+@keyframes fadeSlideLeft{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
+
+/* PROFILE MODAL */
+.profile-modal-inner{padding:16px 20px 20px}
+.profile-avatar{width:64px;height:64px;border-radius:20px;object-fit:cover;margin:0 auto 12px;display:block;box-shadow:0 4px 20px rgba(91,143,255,0.35)}
+.profile-name{font-family:"Unbounded",sans-serif;font-size:16px;font-weight:700;text-align:center;margin-bottom:4px}
+.profile-desc{font-size:13px;color:var(--text2);text-align:center;line-height:1.5;margin-bottom:16px}
+.profile-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--glass-border);font-size:13px}
+.profile-row:last-child{border-bottom:none}
+.profile-row-icon{font-size:18px;width:28px;text-align:center;flex-shrink:0}
+.profile-row-label{color:var(--text2);font-size:11px;margin-bottom:2px}
+.profile-row-val{font-weight:500}
+</style>
+</head>
+<body>
+
+<!-- GROUP SELECT -->
+<div class="group-overlay" id="groupOverlay">
+  <div class="group-modal" style="position:relative">
+    <div class="group-title" style="margin-bottom:6px">📚 Вибери підгрупу</div>
+    <div class="group-sub">Для правильного відображення<br>розкладу уроків</div>
+    <div class="group-btns">
+      <button class="group-btn" onclick="selectGroup('гр1')">Група 1</button>
+      <button class="group-btn" onclick="selectGroup('гр2')">Група 2</button>
+    </div>
+    <div id="groupSkipRow" style="display:none;text-align:center;margin-top:14px">
+      <span onclick="document.getElementById('groupOverlay').classList.add('hidden')" style="font-size:13px;color:var(--text2);cursor:pointer;text-decoration:underline">Пропустити / Закрити</span>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <img class="logo-img" style="cursor:pointer" onclick="openProfile()" src="data:image/jpeg;base64,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" alt="logo">
+  <div class="header-text">
+    <div class="header-title">Щоденник 9-А</div>
+    <div class="header-sub" id="headerSub">9-А клас</div>
+  </div>
+  <div class="header-right">
+    <div class="admin-badge" id="adminBadge">Адмін</div>
+    <button class="icon-btn" onclick="openGroupChange()" title="Підгрупа">👥</button>
+    <button class="icon-btn" id="adminBtn" onclick="openAdminLogin()">🔐</button>
+  </div>
+</div>
+
+<!-- TAB CONTENTS -->
+<div class="tab-wrapper">
+<div class="tab-content active" id="tab-hw">
+  <div class="week-nav">
+    <button class="week-arrow" onclick="changeWeek(-1)">‹</button>
+    <div class="week-days" id="weekDays"></div>
+    <button class="week-arrow" onclick="changeWeek(1)">›</button>
+  </div>
+  <div class="week-range" id="weekRange"></div>
+  <div class="content" id="hwContent"><div class="loading"><div class="spinner"></div>Завантаження...</div></div>
+</div>
+
+<div class="tab-content" id="tab-schedule">
+  <div class="sch-day-tabs" id="schDayTabs"></div>
+  <div class="content" id="scheduleContent"></div>
+</div>
+
+<div class="tab-content" id="tab-bells">
+  <div class="content" id="bellsContent"></div>
+</div>
+</div><!-- /tab-wrapper -->
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <div class="nav-item active" id="nav-hw" onclick="switchTab('hw')">
+    <span class="nav-icon">📝</span>
+    <span>Д/З</span>
+  </div>
+  <div class="nav-item" id="nav-schedule" onclick="switchTab('schedule')">
+    <span class="nav-icon">📅</span>
+    <span>Розклад</span>
+  </div>
+  <div class="nav-item" id="nav-bells" onclick="switchTab('bells')">
+    <span class="nav-icon">🔔</span>
+    <span>Дзвінки</span>
+  </div>
+</nav>
+
+<!-- TODAY FAB -->
+<button class="today-fab" id="todayFab" onclick="goToToday()" title="На сьогодні">📍</button>
+
+<!-- ADMIN LOGIN -->
+<div class="overlay" id="loginModal" onclick="closeOutside(event,'loginModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🔐 Вхід адміна</div>
+    <div class="modal-label">Пароль</div>
+    <input class="m-input" type="password" id="passInput" placeholder="••••••" maxlength="30" onkeydown="if(event.key==='Enter')tryLogin()">
+    <div class="m-error" id="passError">Неправильний пароль</div>
+    <div class="modal-actions" style="margin-top:16px">
+      <button class="btn btn-primary" onclick="tryLogin()">Увійти</button>
+    </div>
+    <div id="adminStatsArea" style="display:none;margin-top:16px"></div>
+    <div style="text-align:center;margin-top:14px">
+      <span style="font-size:12px;color:var(--text3);cursor:pointer" onclick="logout()">Вийти з адміна</span>
+    </div>
+  </div>
+</div>
+
+<!-- CHANGE GROUP -->
+<div class="overlay" id="groupChangeModal" onclick="closeOutside(event,'groupChangeModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">👥 Змінити підгрупу</div>
+    <div class="group-btns" style="margin-top:8px">
+      <button class="group-btn" onclick="selectGroup('гр1');closeModal('groupChangeModal')">Група 1</button>
+      <button class="group-btn" onclick="selectGroup('гр2');closeModal('groupChangeModal')">Група 2</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT HW -->
+<div class="overlay" id="editModal" onclick="closeOutside(event,'editModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="editModalTitle">Редагувати Д/З</div>
+    <div class="modal-label">Текст завдання</div>
+    <textarea id="hwTextInput" rows="5" placeholder="Введи домашнє завдання..."></textarea>
+    <div class="modal-label">Фото</div>
+    <div class="file-drop" onclick="document.getElementById('fileInput').click()">
+      <span style="font-size:22px">📎</span><span>Натисни щоб додати фото</span>
+    </div>
+    <input type="file" id="fileInput" accept="image/*" multiple onchange="handleFiles(event)">
+    <div class="photo-preview" id="photoPreview"></div>
+    <div class="modal-actions">
+      <button class="btn btn-danger" onclick="clearHW()">🗑</button>
+      <button class="btn btn-primary" onclick="saveHW()">Зберегти</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT DAY NOTE -->
+<div class="overlay" id="dayNoteModal" onclick="closeOutside(event,'dayNoteModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="dayNoteTitle">📌 Нотатка на день</div>
+    <div class="modal-label">Текст або нагадування</div>
+    <textarea id="dayNoteInput" rows="4" placeholder="Наприклад: принести щоденник, контрольна з алгебри..."></textarea>
+    <div class="modal-label">Фото</div>
+    <div class="file-drop" onclick="document.getElementById('dayNoteFile').click()">
+      <span style="font-size:22px">📎</span><span>Додати фото</span>
+    </div>
+    <input type="file" id="dayNoteFile" accept="image/*" multiple onchange="handleDayNoteFiles(event)">
+    <div class="photo-preview" id="dayNotePhotoPreview"></div>
+    <div class="modal-actions">
+      <button class="btn btn-danger" onclick="clearDayNote()">🗑</button>
+      <button class="btn btn-primary" onclick="saveDayNote()">Зберегти</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- PROFILE MODAL -->
+<div class="overlay" id="profileModal" onclick="closeOutside(event,'profileModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <img class="profile-avatar" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAICAgICAQICAgIDAgIDAwYEAwMDAwcFBQQGCAcJCAgHCAgJCg0LCQoMCggICw8LDA0ODg8OCQsQERAOEQ0ODg7/2wBDAQIDAwMDAwcEBAcOCQgJDg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg7/wAARCABQAFADASIAAhEBAxEB/8QAHAAAAgMBAQEBAAAAAAAAAAAABwgFBgkDBAAB/8QAORAAAQQCAQMDAwIEBAQHAAAAAQIDBAUGEQcAEiEIEzEUIkEyURUjYXEXJEJiCRYzoTVSY4GCsbP/xAAcAQADAAIDAQAAAAAAAAAAAAAFBgcECAACAwH/xAAyEQACAgAFAwMCBAUFAAAAAAABAgMRBAUSITEABiITQVEycQcUYYEVFiORoSQzQsHx/9oADAMBAAIRAxEAPwAyYNj7NlkDLM9lK68eZSy8llTaPypKleAR86Pjx5/fopZvnXpk4o44mryPN69+Y5DZffiQWlSFvhHcWykJ+3S1AnQVpRQQnej0YMn4mosJr0W1FFkXGMTorkeyamMIllgKAT2KJT2hCwopJUP3HnfS31nAFXQxp1BjtJGFLYWLK7mNYvtTo05TSSYzTipQWtpDQUoJbb0BsjfySK/FbujO5sdFJgGn/LsFoQ+J1Bhq1t5UQaC6UIsjWQCrdKPYvbOWBJIcwaJJlJsyEVpK7abAsEXdm+a4avqXFoWdY9i9zgcGdYVeQV7c6vcnobjOqbWju2psqPtgf7j/APeurlkXBt3jmPCxXY1Nm2lAL7MSZ/NaJ+R2qA79fkp3+/RJRh82pxzEqpiqTKbnsmPTBtxmMqS6lpT6x2d4KtIQvSdjQ148dUtxq/ceguRMFkzUzp71dBbYsoqlOzGPcDrIJd8lPsuE+djtPViybvXFQZZhP4nNplI8wELm+TqKnxqqulBayBVATHNe18O+PxC4CBnj1HQ16RpugQCu987kmiL3s9CxGKd0Nl1JbU44tQ9kb70Aa8q8a0d+NE/B3rq24Pi+DSLVM7L5EuRVJJCI9anw8oeD3OpO0gH8AbOtbHXP6PlG3lVcFPH7MeutJz8BToktOF1xpLnvMt9r3lafacBH47D14Et8vLtqyxqONmwzbPyI0iCxGZSfqo3cjsbCHQnuSllfcB+Un8jr5jfxMgbHLhEjk9FgdUgBBU7lQBp9wps2CNvcizGB/DHMBgWxjyR+shGmMkEMNgxJ1fLAgVRo+10ZsvgcH22KNwKmjVjsuO2r6eVXx1hzuPx7vdsup/oTv9iOl/mYY+xIaSlChGfHdGfkMlhDqfjuBX/p3+d66L+JXGUs42zYXHGFn/FnJ78eG3HhIlIlOMpWVISgqO1pLbiSk/lBPRCsrrKM5oYLVnAkCE/YrgsJk06m3USEBfe2kHyFDscHjxtJH46Ycp7qwiH08PKWXk+oxsfYFd9+d6/fpazXt7GyOxxMQWQUAI08T9yGrjg0f+ulaOAleQNVDd1VTblxsOJraqSbCSlJ+FLSyFJaT/ucUhP9eq3cYa5DyZypivC0mJUG1JjNlf8AN/Ladb7yD48fnet66N2A8TZTTcmZ8cNdsUWt1MXKuWH5IbYbP6UJ7DpCVAE6Xrv3+dDXTQ8e8V1uCyX7F1tm6y1nfbLQpSWoSFoAKQFHRV+r7tb18a6acV3UMu1NJKJDQ0otCyfdjvpH7m/a+OhuB7cbMyqQRMi35O10K5CjbUefYVW9c9ca3mnjW3D0SpntONJcUw/BmD7X9ee5AVvuT4+f6fHS+8sWVJeWrUnFL5EBi3dTBLMQtpiJkOKShHesqHaXFOoA+B+fO9HPDHL+2jY+LO7ilFcwt1ExbyHFqZACAlPYn7kJUColzR2rQ2OpGBn38YlRqqBFmNxp6HGnnpO0pcbUn22FnYHe4h5TCt7V262nQB1pPhu4MyzGOXCJGoemtwzafkLQ5b9CRe24Is3sw4WSeD8/5Rs6AhRRCk0zE2CFAO9X78daZ4xmFtjWOUGBNP4lmmaYfTNzG6ya44LMt9qmw8lw+WFOAqbS57Xb50To76LuLZ/w3kHGOOZZVu4/FguuJtYDAaYMqLJlJUpSgy33LTIV3uJWUp7ie/ZPnrNnlvnrGsTzujz/AB/HHpvIeZYoxWv3bksCLVQQ4h18hofct/8AnHX4+xPkAEK48gckQnMekVtNa0GOMN5NHb4+eq7ZuncXRiCj6yKZjKS4yHSHEd+u4KKCPISeoXk3e2eRoHx6+qJR4mgmllOlx43ahiKujpDsdgL2ZfsoSpGqQFAKFj9hW93vVE71dg7daTL5D4IqCwt6woatdPYGSjvqFsmtlyu5PuKBZHsOvFxYBV2qcKzru7vPqr8q4KDtautnYtHcrJ702H7UZDaq+VI7/ec12gsvL73O/u7VnuV3Dz1nI36kuOK/krJ5VrkUS5TM/gKWoapSZjVVIipcSktOHRlBlxSXlLXtW/KvgADviLmuLgEimq5nKbGTXN9yJIyHJriNZ9qZEVqM42A+o6CfecS1pv40EpTsJ6Op37mRgeRsGbUKQPMarXU1HSfpGq/naru+un8h3CWCMGFUCV3O1j6dqI/favnrXWmh8TSZmPDHm8YkSK6dIsqRuvfYUuPIkd4kPtJQd96/cd7iBs9yt9TUfAcPjNU6I2MQ4zdXcvXFf2MKSI05/wBwuyE/71l53ZP/AJz1ktQZopXpey+tYyB7NLC3x6fa0cSKxAZbh2cuY480llxP+cU+0t1P85akoHgDRHgkN5tbYlw+7WQ47lPdU2O0MdrJ2XHm3pNq/ICJjqnQvsebaR2qWpQUNqV3EjonF+IeGM4hkhbUXCeLfJAumCnYsAeedid+hc3Y8sdlTVGqK+3zyD/j22uurxa8x8n4fynk1xbsKrsUXk85injSYyECyZS4rscbUk96khA2Ff18/OurfI9S0Kbh1c52LgiQ37rrBTr2fkKK1EDev3P7+Osza7LEuWGVXeRx7KTTRM8tYqzOne3BY9996QGGgQVIKlJC1dpA/Gtnr6XkELJmUv0Ns80lDrn1Tc2N2xkt94SwGV724oo7iQoJ1oa3vw5R5/3JleMn9YK6q2xZfEAGlA3LWRVi/mtt+tdMThlMamN2X1BdXub5rbiwa+3VQr/r7jhh7NId9GprtL6YDUZTZdlyXFqKQIrYJBK1doLhAI/SkfKui5hvCXqCaxO2s8Sw6syJ6UiPND1slcqWEhwrbLbqikKR3tK8to7dp1s/PQE44Zx7GeaMRnZFYMyYLL/eyhMj7I/vJ0vYIADgSXE/nt7jo+T1unAq+VbP1M4DmlJW4VS8fxa2RUXIavHZc6fBX2utEIbYRHS8h5GwEqUke66NkKHWZi8C2FxmIy+RgqRkUAANiLG/J2O+/PFAb3fKny/KMiyzOsFhg0s8b6mkJcalbS/iDpB1A6aAIUjVd0M4eJcD43y7nitqeVYlpCrsoopNXQRHb9xcOkvU7VJgOhLbS99vtuMpX8hoA+5sHqxt8EcbY16fOO0Zm5TYXyPh1JMzDkC1/wCXP4tIsoTcpbDcdxtLqA42e4KKfkpbGvz1PepWKu09Q3KNfhGOycscSKCyuItQ4HJ0d5h99X1EVCe1XvpaSygoTtxLRJHdrwsFrO5iq8quOU8hx+6UMuq5NJV0TlG9LlMsxy27G+qjBJU2l9anlJQ4BsIUfgjrYLtDAZfjMmiIaOE6iukBdyAwLUboMCdV3bAHfqD9+5t3Dhs+cxerOhjWSyxsatBVLFWVJsEAUo4F9PbErE43Pq8TtJ/HlBHl3zVNiNjV4D9Um5ckQ1S0qlR3H9Q2koBbV7aipSvIKfAIk5NkTKb0ouZjdvYJUtZBRxGIkKBhja5DtzIeW0IUdSXNoZbaSV/UugqSe0gHRSa1S+nnn2xwKoytHIskXl6hm0t27nGFSjWzlsBChE9pzbS2mz7JCwBtB8jZHURK9M3PDGIihVnFfZ1TUePGbiWeKTwkCO57jTx7VKAe7gNqHj8jZA2bij7XRhqnWwePT+D9vf8A8obBOaXvYt/tAg1dSm6PJG3I9vn36uEv04Yrc828jPYkxjnHiYeRV9DTMV1VOtm4M5qC1MXOEvuQplslfY4XW1tAgb2pQPUTwtwZI5NxJu3xrJpaa1Vo/CzhMl4zGbByHMUt52I8FoQhl4EJ2GjtHjQIO6unjT1JY/YqkFGN3EpVy9bIkDIp9akSHWw0fcZcYHupCAAEqKh4HjYHR5xityzg7/hb5XWt5LXHPkSFWKPbcQwyyZE0F3sS92lqO2p4JS4sJ+9ROgD0j925T2rJhBiAUnmJUChTUu4vi9wDvZv+xo/ZXcXfUOK/JzloIq2tgy6m2NXekD2JoC7oVfWbsrkmyteA7fBl17S6eRMN67OVGIW/LefceIDo/Cu1ej86Ckg6SdRuWXn8ZwrBrWwzxnKLCNWCAa+K17DtWwzoxm1aSn3PtKwV6OiNAn5LNZ0bStwliqrKezj4fIhOIajRGkIXDjSmnn0g+22UuusvTprAB2EhwqHyCAHkd9HzauWy9AOKTYKluxYLkGO049HfZbUpp5bJ71ONqbbYQlaEI7Gid9xUOkLIct/M4uL1Izpm/qBjRIZ081IILKb5AqitWRyw945pgs4y5pcNGscmFVoioBUaUmAiqjTtpJNtepWulaumb9OOOU+S2GV43l95UxcPmsAKE3HmnpIeKT5Q6pQUhASN68+dEdvkkm81ZZZcXcD4xx/wJns9EtlLUIokATm5B9xKttIeK1NHuAUkIWAFAdLEiPVwYKJVll4xpkkL9mtgrkzZZ+4abSCEgj4+7f6h46/IWD8rZLcv2WM8evVVbGKXo9/yA649M9tR0h1msYQXV/3QwsDRJUAN9R7Iu3837u7gOcy5gsKswLrRDPQ07JGPPi/pu+Tx0zd04bMezsZHhcuwpOGYqyW3htVqxkagSSQObBob2AV8O49zPBK97OOR+YVU9hIkPOlqc59fIsZjw12KjtIWFLUrtACitSdggAgdNZxrcepvOMVi+56X8OxCuSrZlZBksuuW8r4US22lTqvI89yAP6DoZeljibKLzl6ejkvmaHm1ZRS2rRnFqywaRGROGkpffjghxAY0CG3Uo08UFSdp61ljriIjpjxXWT7adBDTgUQB/Y76qsMa5VLJCjGVb2Lh1ND4QkaftxVftgZpiZs1KSygRyD6ghVhZ9tenyr5O930nubcq8+8R4ELa94Ww6zxiIj/ADEjGcqluphNgfqW0qIFhA87UlKgPk6Hnrx4z6iObMsx9m3pvShd2lU837jMtvJWYiH0/gtiWy0VA/ggaP79M3bSI07ISzPdbYpoKPqLF906QEj4So/Hnzv+gPQ6s+dEXty7S8T4tM5DsGl+2/NZT7UCOf8A1JCtIH9tk/06w5u4svwy+nNGDIfpA1szfrpU3QPLGlHv1hR5LmE7aopW0geV6Aq/FsVoX8Xfx0uuc+qPJqUQa3PODcx4bEiQERr6bPiyYfua8NFbQIJWAda7tFO9HXS6Z5kLnJDeYOVSoBiZFHUxZCqeLzqm1dpI0r7hsoST9mtj46YP1A4hyNZ+lyjp88y3G73JZmWvzkVk6BqsVELSw1EWQk962iQpLxR+rfx89ZqXnHeS4ZMbsJmK32FssqCha4/JNpWDz+op2v2x/wDNv+w6nGd4+HEZv6MUqxyKFIWxZO9EX5XRrxvbqk9uZpkeQ4bVnmXSzoSamVBKgG1hkBBWjflR+a6icg4fW7RN0cJUd6ehalRG34pQ+v7gpKVJaHcodwPns+DroCUeOO42/fMu+/ETAuXIMt5EIBPvg6KVbIIVsHxr8dPNx9luW/4fWUGHy5ieJ0sactmflTNaqVe2zi/vCW23CrXalSUggL1oa1rpdeY8CbrOQKXI6kZBJq7ZxTZm38MCTZSR3OvynFhWxsKR2pUNn7vjXTllOdZll8SlsRuBY8RYBNnavezuePgbddM2wna/cuMP8Mwg9KQ7nXJTUKBokFSaHjQv5JsF6cJzfGKCrr4k104Hk8d15QurOqbnVlp3f9JpbytqhAD7StASvySCSB0SMl5bwuBjS8Zy+niZvniyksVeHz5M1wNdoU2TPc7ZDafO9Fftgf6vJHWM7PPHJCG+wXVgtsjSkqkoPcP2O0f9urfjnqB5DpYy0VJehtPK7nRGcYZ9wn8q015/9+l2HAZll2HT/Sp6kdaWWRkBqt3AotdDUNQVv+Sno/mceS9whocRKWic2VaMMwBvxDV9O5rUrFRspUbdP3MyPLsrdXFZyKr4uxuOgCa1V0n1z0tXcSiIqSpaVzJBIKikKUB9u3PI66Ya16k7zNZ8PA7rHra8qGEyLD6hUuvLBJPa2VLeUnv0knt1rQ8E9J9G9S3MKg2tEqclaPCVG0YB0fkA+1sA6H/br2Q/ULzBDVIMMSo/vvKef9uwjfzFqOypRLWyT/XrCXNO4gZTjisjMAE3iATyBYjxJNjxAOwu9yL68Iu18BCkEeBfQiXqGiTzGkhV2rSFJB23OlRdFrcnLOYfULGcbTyDxrhM5SUOhRRkrjaJTewT7jallCzoDZI8/gAHXVqxf1tciU0OFUvcPD+FNpCGYlA5GcQ2B+ENt9pH9vnpFX/URy3YtlE6E9PSPPY/OiuD+/3MkdRLPMGfR7L6uPjbbEvvDiXW5UQKCh8EEM+COvNM0zBYfKFDJ7nWKPxsrKRX6lr/AE6LjtzBPIVldvT9qVrBre9SOGs/Gih89N9zpygv1JZbjsR+svsLwyhR/EL4zGHoDqHAoNtNIcAJGyoq7xvQKvHjqgRMuyPGswTR4Nl1lkktxSVxamcRbLTFPguqmRu1QA0SQtO9fufBBj3qF5cA8syx877rJgn/APPqv/4/8n1rT5htP1/vL7njFlxmy4f3UEsjZ/v0BzCDE53GVxeHRiBSD1FKr7nYgkkkk2CDwOB0by+BMlkAw8v9I3rDRtqY8CmFAAAAUVPBNgnprYea5c9ym0KHhunuuRrOOGYs0yorcNooUrvdcc0hwE9yQUuoQr7QN9DHK67Ocuzsz8uzheYtxHj9KxVN/T1SXEkhSmWz9y0j9IUvyT3HwNbXa29Q/JEtpxua/NdDgCV98xpXdo+Af5fnXVOk8355IX/4hOaUPA/zKdDXxrSOvbCdv9wfl1w8ehYwKABv/JJ+wqveydgOSZlkeGxZnN/bSef7Db9K536//9k=" alt="avatar">
+    <div class="profile-name">Розклад Уроків</div>
+    <div class="profile-desc">Щоденник 9-А класу<br>Розроблено для зручного перегляду Д/З</div>
+    <div class="profile-row">
+      <span class="profile-row-icon">👨‍💻</span>
+      <div><div class="profile-row-label">Розробник</div><div class="profile-row-val">Вкажи своє ім'я</div></div>
+    </div>
+    <div class="profile-row">
+      <span class="profile-row-icon">🏫</span>
+      <div><div class="profile-row-label">Клас</div><div class="profile-row-val">9-А</div></div>
+    </div>
+    <div class="profile-row">
+      <span class="profile-row-icon">📅</span>
+      <div><div class="profile-row-label">Навчальний рік</div><div class="profile-row-val">2024–2025</div></div>
+    </div>
+    <div class="profile-row">
+      <span class="profile-row-icon">⚡</span>
+      <div><div class="profile-row-label">Версія</div><div class="profile-row-val">1.0</div></div>
+    </div>
+  </div>
+</div>
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lb-close">✕</button>
+  <img id="lightboxImg" src="" alt="">
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, onValue, set, remove, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD5_rEHD6Qlm0-8izEWZkx88EYJ8lK2YjM",
+  authDomain: "rozkladurokiv-fdc44.firebaseapp.com",
+  databaseURL: "https://rozkladurokiv-fdc44-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "rozkladurokiv-fdc44",
+  storageBucket: "rozkladurokiv-fdc44.firebasestorage.app",
+  messagingSenderId: "853245540932",
+  appId: "1:853245540932:web:24afecbe23f07fc8505a11"
+};
+const ADMIN_PASS = "admin123"; // ← ЗАМІНИ
+
+// Telegram WebApp bg fix
+(function(){
+  if(window.Telegram&&window.Telegram.WebApp){
+    const tg=window.Telegram.WebApp;
+    tg.expand();
+    tg.setBackgroundColor("#0a0c12");
+    tg.setHeaderColor("#0a0c12");
+  }
+})();
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const SCHEDULE = {
+  пн:["Біологія",["Укр. мова","Англ. мова"],["Англ. мова","Укр. мова"],"Фізкультура","Алгебра","Фізика","Основи здоров'я"],
+  вт:["Географія","Зарубіжна літ.","Українська літ.",["Укр. мова","Інформатика"],"Геометрія","Хімія"],
+  ср:["Алгебра",["Англ. мова","Укр. мова"],["Інформатика","Англ. мова"],"Історія України","Правознавство","Фізика","Фізкультура"],
+  чт:[["Інформатика","Англ. мова"],"Геометрія","Українська літ.","Зарубіжна літ.","Трудове навчання","Географія / Іст. України","Фізкультура"],
+  пт:["Всесвітня історія","Фізика",["Англ. мова","Інформатика"],"Хімія","Мистецтво","Біологія"],
+};
+const BELLS=[{s:"8:30",e:"9:15"},{s:"9:25",e:"10:10"},{s:"10:30",e:"11:15"},{s:"11:35",e:"12:20"},{s:"12:30",e:"13:15"},{s:"13:25",e:"14:10"},{s:"14:20",e:"15:05"}];
+const DAYS=["пн","вт","ср","чт","пт"];
+const DAYS_FULL={пн:"Понеділок",вт:"Вівторок",ср:"Середа",чт:"Четвер",пт:"П'ятниця"};
+
+let isAdmin=localStorage.getItem("isAdmin9a")==="1";
+let userGroup=localStorage.getItem("group9a")||null;
+let weekOffset=0;
+let selDay=0;
+let schSelDay=0;
+let editKey=null;
+let pendingPhotos=[];
+let dayNotePhotos=[];
+let hwData={};
+let schData={};
+let dayNoteData={};
+
+// Init group check
+if(!userGroup){
+  document.getElementById("groupOverlay").classList.remove("hidden");
+  document.getElementById("groupSkipRow").style.display="block";
+} else {
+  document.getElementById("groupOverlay").classList.add("hidden");
+}
+// When opened from settings (user already has group), show close option
+window.openGroupChange=function(){
+  document.getElementById("groupOverlay").classList.remove("hidden");
+  document.getElementById("groupCloseRow").style.display="block";
+};
+updateHeaderSub();
+applyAdminUI();
+renderBells();
+buildSchDayTabs();
+
+// Firebase
+onValue(ref(db,"hw"),snap=>{hwData=snap.val()||{};renderHW();});
+onValue(ref(db,"sch"),snap=>{schData=snap.val()||{};});
+onValue(ref(db,"daynote"),snap=>{dayNoteData=snap.val()||{};renderHW();});
+
+// Today
+const todayRaw=new Date().getDay();
+selDay=todayRaw===0?4:todayRaw===6?4:Math.max(0,todayRaw-1);
+schSelDay=selDay;
+renderWeekNav();
+
+// ── GROUP ──
+window.selectGroup=function(g){
+  userGroup=g;localStorage.setItem("group9a",g);
+  document.getElementById("groupOverlay").classList.add("hidden");
+  updateHeaderSub();renderHW();
+};
+window.closeGroupIfHasGroup=function(){
+  if(userGroup)document.getElementById("groupOverlay").classList.add("hidden");
+};
+window.maybeCloseGroup=function(e){
+  if(e.target===document.getElementById("groupOverlay")&&userGroup)
+    document.getElementById("groupOverlay").classList.add("hidden");
+};
+window.closeGroupOverlay=function(){
+  document.getElementById("groupOverlay").classList.add("hidden");
+};
+window.closeGroupIfHasGroup=function(e){
+  if(e.target===document.getElementById("groupOverlay")&&userGroup){
+    document.getElementById("groupOverlay").classList.add("hidden");
+  }
+};
+function updateHeaderSub(){
+  document.getElementById("headerSub").textContent=userGroup?`9-А · ${userGroup}`:"9-А клас";
+}
+function getGI(){return userGroup==="гр2"?1:0;}
+function lessonName(raw,gi){return Array.isArray(raw)?raw[gi]||raw[0]:raw;}
+
+// ── WEEK ──
+function getMonday(off=0){
+  const n=new Date(),day=n.getDay()||7,m=new Date(n);
+  m.setDate(n.getDate()-day+1+off*7);m.setHours(0,0,0,0);return m;
+}
+window.changeWeek=function(dir){
+  weekOffset+=dir;
+  renderWeekNav();renderHW();
+  // Show/hide today FAB
+  document.getElementById("todayFab").classList.toggle("visible",weekOffset!==0);
+};
+window.goToToday=function(){
+  weekOffset=0;
+  const todayRaw=new Date().getDay();
+  selDay=todayRaw===0?4:todayRaw===6?4:Math.max(0,todayRaw-1);
+  renderWeekNav();renderHW();
+  document.getElementById("todayFab").classList.remove("visible");
+};
+
+function renderWeekNav(){
+  const mon=getMonday(weekOffset),fri=new Date(mon);fri.setDate(mon.getDate()+4);
+  const fmt=d=>d.toLocaleDateString("uk-UA",{day:"numeric",month:"short"});
+  document.getElementById("weekRange").textContent=`${fmt(mon)} – ${fmt(fri)}`;
+  const today=new Date();today.setHours(0,0,0,0);
+  const c=document.getElementById("weekDays");c.innerHTML="";
+  DAYS.forEach((day,i)=>{
+    const d=new Date(mon);d.setDate(mon.getDate()+i);
+    const isToday=weekOffset===0&&d.getTime()===today.getTime();
+    const el=document.createElement("div");
+    el.className="week-day"+(i===selDay?" active":"")+(isToday&&i!==selDay?" today-mark":"");
+    el.innerHTML=`<span>${day}</span><span class="dn">${d.getDate()}</span>`;
+    el.onclick=()=>{selDay=i;renderWeekNav();renderHW();};
+    c.appendChild(el);
+  });
+}
+
+// ── HW ──
+function hwKey(dk,i){return `w${weekOffset}_${dk}_${i}`;}
+function dayNoteKey(dk){return `w${weekOffset}_${dk}`;}
+
+let lastSelDay=-1;
+let lastWeekOffset=0;
+function renderHW(){
+  if(!userGroup)return;
+  const dk=DAYS[selDay],lessons=SCHEDULE[dk]||[];
+  const cont=document.getElementById("hwContent");
+  if(!lessons.length){cont.innerHTML='<div class="empty">Вихідний 🎉</div>';lastSelDay=selDay;return;}
+  const gi=getGI();
+  const sameWeek=weekOffset===lastWeekOffset;
+  const goRight=!sameWeek?(weekOffset>lastWeekOffset):(selDay>lastSelDay||lastSelDay===-1);
+  lastSelDay=selDay;
+  lastWeekOffset=weekOffset;
+  const c=cont;
+
+  // Use DocumentFragment for performance
+  const frag=document.createDocumentFragment();
+  const wrap=document.createElement("div");
+  wrap.className="hw-content-wrap"+(goRight?"":" slide-left");
+
+  // Day note card
+  const dnKey=dayNoteKey(dk);
+  const dn=dayNoteData[dnKey]||{};
+  const hasDN=!!(dn.text||dn.photos?.length);
+  const dnCard=document.createElement("div");
+  dnCard.className="day-note-card";
+  const dnHeader=document.createElement("div");
+  dnHeader.className="day-note-header";
+  dnHeader.innerHTML=`<span class="day-note-title">📌 Нотатка на день</span>`;
+  if(isAdmin){
+    const eb=document.createElement("button");
+    eb.style.cssText="background:rgba(91,143,255,0.15);border:1px solid rgba(91,143,255,0.3);color:var(--accent);padding:4px 10px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit";
+    eb.textContent="✏️";
+    eb.onclick=()=>openDayNote(dk,dn);
+    dnHeader.appendChild(eb);
+  }
+  dnCard.appendChild(dnHeader);
+  if(dn.text){
+    const t=document.createElement("div");t.className="day-note-text";t.innerHTML=esc(dn.text);
+    dnCard.appendChild(t);
+  }
+  if(dn.photos?.length){
+    const g=document.createElement("div");g.className="hw-photos";
+    dn.photos.forEach(src=>{const img=document.createElement("img");img.className="hw-photo";img.src=src;img.onclick=()=>openLightbox(src);g.appendChild(img);});
+    dnCard.appendChild(g);
+  }
+  if(!dn.text&&!dn.photos?.length){
+    const e=document.createElement("div");e.className="day-note-empty";
+    e.textContent=isAdmin?"Натисни ✏️ щоб додати нотатку на весь день":"Нотаток немає";
+    dnCard.appendChild(e);
+  }
+  frag.appendChild(dnCard);
+
+  lessons.forEach((raw,i)=>{
+    const name=lessonName(raw,gi);
+    const key=hwKey(dk,i);
+    const hw=hwData[key]||{};
+    const hasHW=!!(hw.text||hw.photos?.length);
+    const bell=BELLS[i]||{};
+    const card=document.createElement("div");
+    card.className="hw-card"+(hasHW?" has-hw":"");
+
+    const header=document.createElement("div");
+    header.className="hw-header";
+    header.innerHTML=`
+      <div class="hw-num">${i+1}</div>
+      <div class="hw-meta">
+        <div class="hw-subject">${esc(name)}</div>
+        ${bell.s?`<div class="hw-time">${bell.s}–${bell.e}</div>`:""}
+      </div>
+      <div class="hw-dot"></div>
+      <div class="hw-chevron">⌄</div>`;
+    header.onclick=()=>card.classList.toggle("open");
+    card.appendChild(header);
+
+    const body=document.createElement("div");body.className="hw-body";
+    const inner=document.createElement("div");inner.className="hw-body-inner";
+    if(hw.text){const t=document.createElement("div");t.className="hw-text";t.innerHTML=esc(hw.text);inner.appendChild(t);}
+    if(hw.photos?.length){
+      const g=document.createElement("div");g.className="hw-photos";
+      hw.photos.forEach(src=>{const img=document.createElement("img");img.className="hw-photo";img.src=src;img.onclick=()=>openLightbox(src);g.appendChild(img);});
+      inner.appendChild(g);
+    }
+    if(!hw.text&&!hw.photos?.length){const e=document.createElement("div");e.className="hw-empty";e.textContent="Домашнє завдання не задано";inner.appendChild(e);}
+    if(isAdmin){
+      const btn=document.createElement("button");btn.className="edit-btn";btn.textContent="✏️ Редагувати Д/З";
+      btn.onclick=e2=>{e2.stopPropagation();openEditHW(dk,i,name,hw);};
+      inner.appendChild(btn);
+    }
+    body.appendChild(inner);card.appendChild(body);
+    frag.appendChild(card);
+  });
+  wrap.appendChild(frag);
+  c.innerHTML="";
+  c.appendChild(wrap);
+}
+
+window.openEditHW=function(dk,i,name,hw){
+  editKey=hwKey(dk,i);pendingPhotos=(hw.photos||[]).slice();
+  document.getElementById("editModalTitle").textContent=`ДЗ: ${name}`;
+  document.getElementById("hwTextInput").value=hw.text||"";
+  renderPhotoPreview();
+  document.getElementById("editModal").classList.add("open");
+};
+window.handleFiles=function(e){
+  Array.from(e.target.files).forEach(f=>{const r=new FileReader();r.onload=ev=>{pendingPhotos.push(ev.target.result);renderPhotoPreview();};r.readAsDataURL(f);});
+  e.target.value="";
+};
+function renderPhotoPreview(){
+  const hasPhotos=pendingPhotos.length>0;
+  const fd=document.querySelector("#editModal .file-drop");
+  if(fd)fd.classList.toggle("hidden",hasPhotos);
+  document.getElementById("photoPreview").innerHTML=
+    pendingPhotos.map((src,i)=>`<div class="pp-item"><img src="${src}"><button class="pp-rm" onclick="removePhoto(${i})">✕</button></div>`).join("")+
+    (hasPhotos?`<div style="grid-column:1/-1"><button class="add-more-btn" onclick="document.getElementById('fileInput').click()">+ Ще фото</button></div>`:"");
+}
+window.removePhoto=function(i){pendingPhotos.splice(i,1);renderPhotoPreview();};
+window.saveHW=async function(){
+  if(!editKey)return;
+  await set(ref(db,`hw/${editKey}`),{text:document.getElementById("hwTextInput").value.trim(),photos:pendingPhotos});
+  closeModal("editModal");
+};
+window.clearHW=async function(){
+  if(!editKey||!confirm("Очистити Д/З?"))return;
+  await remove(ref(db,`hw/${editKey}`));
+  closeModal("editModal");
+};
+
+// ── DAY NOTE ──
+let editDayNoteKey=null;
+function openDayNote(dk,dn){
+  editDayNoteKey=dayNoteKey(dk);
+  dayNotePhotos=(dn.photos||[]).slice();
+  document.getElementById("dayNoteInput").value=dn.text||"";
+  renderDayNotePhotos();
+  document.getElementById("dayNoteModal").classList.add("open");
+}
+window.handleDayNoteFiles=function(e){
+  Array.from(e.target.files).forEach(f=>{const r=new FileReader();r.onload=ev=>{dayNotePhotos.push(ev.target.result);renderDayNotePhotos();};r.readAsDataURL(f);});
+  e.target.value="";
+};
+function renderDayNotePhotos(){
+  const hasPhotos=dayNotePhotos.length>0;
+  const fd=document.querySelector("#dayNoteModal .file-drop");
+  if(fd)fd.classList.toggle("hidden",hasPhotos);
+  document.getElementById("dayNotePhotoPreview").innerHTML=
+    dayNotePhotos.map((src,i)=>`<div class="pp-item"><img src="${src}"><button class="pp-rm" onclick="removeDNPhoto(${i})">✕</button></div>`).join("")+
+    (hasPhotos?`<div style="grid-column:1/-1"><button class="add-more-btn" onclick="document.getElementById('dayNoteFile').click()">+ Ще фото</button></div>`:"");
+}
+window.removeDNPhoto=function(i){dayNotePhotos.splice(i,1);renderDayNotePhotos();};
+window.saveDayNote=async function(){
+  if(!editDayNoteKey)return;
+  await set(ref(db,`daynote/${editDayNoteKey}`),{text:document.getElementById("dayNoteInput").value.trim(),photos:dayNotePhotos});
+  closeModal("dayNoteModal");
+};
+window.clearDayNote=async function(){
+  if(!editDayNoteKey||!confirm("Очистити нотатку?"))return;
+  await remove(ref(db,`daynote/${editDayNoteKey}`));
+  closeModal("dayNoteModal");
+};
+
+// ── SCHEDULE ──
+function buildSchDayTabs(){
+  const c=document.getElementById("schDayTabs");c.innerHTML="";
+  const todayRaw=new Date().getDay();
+  const todayIdx=todayRaw===0?4:todayRaw===6?4:Math.max(0,todayRaw-1);
+  DAYS.forEach((d,i)=>{
+    const el=document.createElement("div");
+    el.className="sch-day-tab"+(i===schSelDay?" active":"");
+    el.textContent=DAYS_FULL[d];
+    el.onclick=()=>{
+      schSelDay=i;
+      document.querySelectorAll(".sch-day-tab").forEach((t,j)=>t.classList.toggle("active",j===i));
+      renderScheduleDay();
+    };
+    c.appendChild(el);
+  });
+}
+
+function renderScheduleDay(){
+  const now=new Date();
+  const cur=now.getHours()*60+now.getMinutes();
+  const todayRaw=now.getDay();
+  const todayIdx=todayRaw===0?4:todayRaw===6?4:Math.max(0,todayRaw-1);
+  const isToday=schSelDay===todayIdx;
+  const gi=getGI();
+  document.getElementById("scheduleContent").innerHTML=renderSchDay(DAYS[schSelDay],isToday?cur:-1,gi);
+  if(isAdmin){
+    document.querySelectorAll(".sch-save").forEach(btn=>{
+      btn.onclick=async()=>{
+        const key=btn.dataset.key;
+        const teacher=document.getElementById(`t_${key}`).value.trim();
+        const room=document.getElementById(`r_${key}`).value.trim();
+        await set(ref(db,`sch/${key}`),{teacher,room});
+        btn.textContent="✓";setTimeout(()=>btn.textContent="Зберегти",1200);
+      };
+    });
+  }
+}
+
+function renderSchDay(dk,curMin,gi){
+  const lessons=SCHEDULE[dk]||[];
+  let html="";
+  lessons.forEach((raw,i)=>{
+    const name=lessonName(raw,gi);
+    const bell=BELLS[i]||{};
+    const [sh,sm]=(bell.s||"0:0").split(":").map(Number);
+    const [eh,em]=(bell.e||"0:0").split(":").map(Number);
+    const isNow=curMin>=sh*60+sm&&curMin<=eh*60+em;
+    const key=`${dk}_${i}`;
+    const sd=schData[key]||{};
+    html+=`<div class="sch-card ${isNow?"now":""} ${isAdmin?"admin-mode":""}">
+      <div class="sch-num">${i+1}</div>
+      <div class="sch-info">
+        <div class="sch-name">${esc(name)}</div>
+        <div class="sch-time">${bell.s||""}–${bell.e||""}</div>
+        ${sd.teacher||sd.room?`<div class="sch-extra">${sd.teacher?`<span>👤 ${esc(sd.teacher)}</span>`:""} ${sd.room?`<span>🚪 каб. ${esc(sd.room)}</span>`:""}</div>`:""}
+        <div class="sch-edit-row">
+          <input class="sch-input" id="t_${key}" placeholder="Вчителька" value="${esc(sd.teacher||"")}">
+          <input class="sch-input" id="r_${key}" placeholder="Каб." value="${esc(sd.room||"")}" style="max-width:72px">
+          <button class="sch-save" data-key="${key}">Зберегти</button>
+        </div>
+      </div>
+      ${isNow?'<div class="sch-badge">Зараз</div>':""}
+    </div>`;
+  });
+  return html||'<div class="empty">Вихідний 🎉</div>';
+}
+
+// ── BELLS ──
+function renderBells(){
+  const breaks=["10 хв","20 хв","20 хв","10 хв","10 хв","10 хв","—"];
+  document.getElementById("bellsContent").innerHTML=BELLS.map((b,i)=>`
+    <div class="bell-card">
+      <div class="bell-num">${i+1}</div>
+      <div><div class="bell-range">${b.s} – ${b.e}</div><div class="bell-dur">Перерва: ${breaks[i]}</div></div>
+    </div>`).join("");
+}
+
+// ── TABS ──
+const TAB_ORDER=["hw","schedule","bells"];
+let currentTab="hw";
+window.switchTab=function(name){
+  if(name===currentTab){
+    if(name==="hw"){goToToday();}
+    return;
+  }
+  const oldIdx=TAB_ORDER.indexOf(currentTab);
+  const newIdx=TAB_ORDER.indexOf(name);
+  const goRight=newIdx>oldIdx;
+  const oldTab=document.getElementById("tab-"+currentTab);
+  const newTab=document.getElementById("tab-"+name);
+
+  // Step 1: show new tab hidden behind
+  newTab.style.display="block";
+  newTab.style.position="absolute";
+  newTab.style.top="0";newTab.style.left="0";newTab.style.right="0";
+  newTab.style.opacity="0";
+  newTab.style.transform="translateX("+(goRight?"40px":"-40px")+")";
+  newTab.style.transition="none";
+
+  // Step 2: animate both
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    // out
+    oldTab.style.transition="opacity .22s ease,transform .22s ease";
+    oldTab.style.opacity="0";
+    oldTab.style.transform="translateX("+(goRight?"-40px":"40px")+")";
+    // in
+    newTab.style.transition="opacity .22s ease,transform .22s ease";
+    newTab.style.opacity="1";
+    newTab.style.transform="translateX(0)";
+
+    setTimeout(()=>{
+      oldTab.classList.remove("active");
+      oldTab.style.cssText="";
+      newTab.classList.add("active");
+      newTab.style.cssText="";
+    },230);
+  }));
+
+  TAB_ORDER.forEach(n=>{
+    document.getElementById("nav-"+n).classList.toggle("active",n===name);
+  });
+  currentTab=name;
+  if(name==="schedule"){buildSchDayTabs();renderScheduleDay();}
+};
+
+// ── AUTH ──
+window.openAdminLogin=function(){
+  document.getElementById("passInput").value="";
+  document.getElementById("passError").style.display="none";
+  document.getElementById("loginModal").classList.add("open");
+  if(isAdmin)showAdminStats();
+};
+window.tryLogin=function(){
+  const val=document.getElementById("passInput").value;
+  if(val===ADMIN_PASS){
+    isAdmin=true;localStorage.setItem("isAdmin9a","1");
+    applyAdminUI();closeModal("loginModal");renderHW();
+    if(document.getElementById("tab-schedule").classList.contains("active"))renderScheduleDay();
+  } else {
+    document.getElementById("passError").style.display="block";
+    document.getElementById("passInput").style.borderColor="var(--red)";
+  }
+};
+window.logout=function(){
+  isAdmin=false;localStorage.removeItem("isAdmin9a");
+  applyAdminUI();closeModal("loginModal");renderHW();
+};
+function applyAdminUI(){
+  document.getElementById("adminBadge").classList.toggle("on",isAdmin);
+  document.getElementById("adminBtn").textContent=isAdmin?"✅":"🔐";
+}
+
+async function showAdminStats(){
+  const area=document.getElementById("adminStatsArea");
+  area.style.display="block";
+  area.innerHTML='<div class="loading" style="padding:20px"><div class="spinner"></div></div>';
+  try {
+    const hwSnap=await get(ref(db,"hw"));
+    const schSnap=await get(ref(db,"sch"));
+    const dnSnap=await get(ref(db,"daynote"));
+    const hwCount=hwSnap.exists()?Object.keys(hwSnap.val()).length:0;
+    const schCount=schSnap.exists()?Object.keys(schSnap.val()).length:0;
+    const dnCount=dnSnap.exists()?Object.keys(dnSnap.val()).length:0;
+    area.innerHTML=`
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+        <div class="stat-card"><div class="stat-num">${hwCount}</div><div class="stat-label">Записів Д/З</div></div>
+        <div class="stat-card"><div class="stat-num">${dnCount}</div><div class="stat-label">Нотаток</div></div>
+        <div class="stat-card" style="grid-column:1/-1"><div class="stat-num">${schCount}</div><div class="stat-label">Кабінетів/вчителів вказано</div></div>
+      </div>`;
+  } catch(e){area.innerHTML='<div style="color:var(--text3);font-size:12px;text-align:center">Не вдалось завантажити</div>';}
+}
+
+// ── MODALS ──
+window.closeOutside=function(e,id){if(e.target===document.getElementById(id))closeModal(id);};
+window.closeModal=function(id){
+  const overlay=document.getElementById(id);
+  const modal=overlay.querySelector(".modal");
+  if(modal){
+    modal.style.transition="transform .25s cubic-bezier(.4,0,1,1)";
+    modal.style.transform="translateY(105%)";
+    overlay.style.transition="background .25s";
+    overlay.style.background="rgba(0,0,0,0)";
+    setTimeout(()=>{
+      overlay.classList.remove("open");
+      modal.style.cssText="";overlay.style.cssText="";
+    },260);
+  } else {
+    overlay.classList.remove("open");
+  }
+};
+
+// Swipe-down to close modals
+(function(){
+  var startY=0,curDY=0,dragging=false,dragModal=null,dragOverlay=null;
+
+  document.addEventListener('touchstart',function(e){
+    // Find closest .modal ancestor
+    var el=e.target,modal=null;
+    while(el){if(el.classList&&el.classList.contains('modal')){modal=el;break;}el=el.parentElement;}
+    if(!modal)return;
+    // Find overlay parent
+    var ov=modal.parentElement;
+    while(ov&&!(ov.classList&&ov.classList.contains('overlay')))ov=ov.parentElement;
+    if(!ov||!ov.classList.contains('open'))return;
+    startY=e.touches[0].clientY;
+    curDY=0;dragging=false;
+    dragModal=modal;dragOverlay=ov;
+    modal.style.transition='none';
+  },{passive:true});
+
+  document.addEventListener('touchmove',function(e){
+    if(!dragModal)return;
+    var dy=e.touches[0].clientY-startY;
+    if(dy<=0){dragModal=null;dragOverlay=null;return;}
+    // Only drag if at top of scroll or small scroll
+    if(!dragging&&dragModal.scrollTop>10){dragModal=null;dragOverlay=null;return;}
+    dragging=true;curDY=dy;
+    dragModal.style.transform='translateY('+dy+'px)';
+    var opacity=Math.max(0,0.55*(1-dy/300));
+    dragOverlay.style.background='rgba(0,0,0,'+opacity+')';
+    dragOverlay.style.backdropFilter='blur('+(10*(1-dy/300))+'px)';
+  },{passive:true});
+
+  document.addEventListener('touchend',function(e){
+    if(!dragModal)return;
+    if(dragging&&curDY>75){
+      var m=dragModal,ov=dragOverlay;
+      m.style.transition='transform .25s cubic-bezier(.4,0,1,1)';
+      m.style.transform='translateY(105%)';
+      ov.style.transition='background .25s,backdrop-filter .25s';
+      ov.style.background='rgba(0,0,0,0)';
+      ov.style.backdropFilter='blur(0px)';
+      setTimeout(function(){
+        ov.classList.remove('open');
+        m.style.cssText='';ov.style.cssText='';
+      },260);
+    } else if(dragModal){
+      dragModal.style.transition='transform .22s cubic-bezier(.4,0,.2,1)';
+      dragModal.style.transform='';
+      if(dragOverlay){dragOverlay.style.background='';dragOverlay.style.backdropFilter='';}
+      setTimeout(function(){if(dragModal)dragModal.style.transition='';},230);
+    }
+    dragModal=null;dragOverlay=null;dragging=false;curDY=0;
+  },{passive:true});
+})();
+
+
+// ── MODALS ──
+window.closeOutside=function(e,id){if(e.target===document.getElementById(id))closeModal(id);};
+window.closeModal=function(id){
+  const overlay=document.getElementById(id);
+  const modal=overlay.querySelector(".modal");
+  if(modal){
+    modal.style.transition="transform .25s cubic-bezier(.4,0,1,1)";
+    modal.style.transform="translateY(105%)";
+    overlay.style.transition="background .25s";
+    overlay.style.background="rgba(0,0,0,0)";
+    setTimeout(()=>{
+      overlay.classList.remove("open");
+      modal.style.cssText="";overlay.style.cssText="";
+    },260);
+  } else {
+    overlay.classList.remove("open");
+  }
+};
+
+// Swipe-down to close modals
+(function(){
+  var sy=0,dy=0,active=null,aov=null,moving=false;
+  function getModal(el){
+    var m=el;
+    while(m&&!m.classList.contains("modal"))m=m.parentElement;
+    return m;
+  }
+  document.addEventListener("touchstart",function(e){
+    var m=getModal(e.target);
+    if(!m)return;
+    var ov=m.parentElement;
+    if(!ov||!ov.classList.contains("overlay")||!ov.classList.contains("open"))return;
+    if(m.scrollTop>0)return; // don't intercept if scrolled
+    sy=e.touches[0].clientY;
+    active=m;aov=ov;moving=false;
+    m.style.transition="none";
+  },{passive:true});
+  document.addEventListener("touchmove",function(e){
+    if(!active)return;
+    dy=e.touches[0].clientY-sy;
+    if(dy<0){active=null;return;} // upward = cancel
+    if(dy>5){
+      moving=true;
+      active.style.transform="translateY("+dy+"px)";
+      var op=Math.max(0,0.55*(1-dy/280));
+      aov.style.background="rgba(0,0,0,"+op+")";
+    }
+  },{passive:true});
+  document.addEventListener("touchend",function(e){
+    if(!active)return;
+    if(moving&&dy>80){
+      var m=active,ov=aov;
+      m.style.transition="transform .24s ease";
+      m.style.transform="translateY(110%)";
+      ov.style.transition="background .24s";
+      ov.style.background="rgba(0,0,0,0)";
+      setTimeout(function(){
+        ov.classList.remove("open");
+        ov.style.cssText="";
+        m.style.cssText="";
+      },250);
+    } else {
+      active.style.transition="transform .2s ease";
+      active.style.transform="";
+      aov.style.background="";
+      setTimeout(function(){if(active)active.style.transition="";},200);
+    }
+    active=null;aov=null;moving=false;dy=0;
+  },{passive:true});
+})();
+
+// ── MODALS ──
+window.closeOutside=function(e,id){if(e.target===document.getElementById(id))closeModal(id);};
+window.closeModal=function(id){
+  const overlay=document.getElementById(id);
+  const modal=overlay.querySelector(".modal");
+  if(modal){
+    modal.style.transition="transform .25s cubic-bezier(.4,0,1,1)";
+    modal.style.transform="translateY(105%)";
+    overlay.style.transition="background .25s";
+    overlay.style.background="rgba(0,0,0,0)";
+    setTimeout(()=>{
+      overlay.classList.remove("open");
+      modal.style.cssText="";overlay.style.cssText="";
+    },260);
+  } else {
+    overlay.classList.remove("open");
+  }
+};
+
+// Swipe-down to close modals — simple handle-based approach
+(function(){
+  // Swipe anywhere in modal (not just handle)
+  let startY=0,startX=0,modal=null,overlay=null,dragging=false;
+
+  document.addEventListener("touchstart",function(e){
+    // Must touch inside an open modal
+    const m=e.target.closest(".overlay.open .modal");
+    if(!m)return;
+    // Only allow swipe-down when scrolled to top
+    if(m.scrollTop>2)return;
+    modal=m;
+    overlay=m.closest(".overlay");
+    startY=e.touches[0].clientY;
+    startX=e.touches[0].clientX;
+    dragging=false;
+    modal.style.transition="none";
+  },{passive:true});
+
+  document.addEventListener("touchmove",function(e){
+    if(!modal)return;
+    const dy=e.touches[0].clientY-startY;
+    const dx=Math.abs(e.touches[0].clientX-startX);
+    if(!dragging){
+      if(dy>8&&dy>dx*1.5){dragging=true;}
+      else if(dx>12){modal=null;return;}
+    }
+    if(!dragging)return;
+    const pull=Math.max(0,dy);
+    modal.style.transform="translateY("+pull+"px)";
+    if(overlay)overlay.style.background="rgba(0,0,0,"+Math.max(0,0.55*(1-pull/260))+")";
+  },{passive:true});
+
+  document.addEventListener("touchend",function(e){
+    if(!modal||!dragging){modal=null;overlay=null;dragging=false;return;}
+    const dy=e.changedTouches[0].clientY-startY;
+    if(dy>90){
+      modal.style.transition="transform .24s cubic-bezier(.4,0,.2,1)";
+      modal.style.transform="translateY(110%)";
+      if(overlay){overlay.style.transition="background .24s";overlay.style.background="rgba(0,0,0,0)";}
+      const _m=modal,_o=overlay;
+      setTimeout(()=>{
+        if(_o){_o.classList.remove("open");_o.style.cssText="";}
+        _m.style.cssText="";
+      },250);
+    } else {
+      modal.style.transition="transform .22s cubic-bezier(.34,1.56,.64,1)";
+      modal.style.transform="";
+      if(overlay)overlay.style.background="";
+      setTimeout(()=>{if(modal)modal.style.transition="";},230);
+    }
+    modal=null;overlay=null;dragging=false;
+  },{passive:true});
+
+  window.attachSwipeToModal=function(){};
+})();
+
+// ── LIGHTBOX ──
+window.openLightbox=function(src){document.getElementById("lightboxImg").src=src;document.getElementById("lightbox").classList.add("open");};
+window.closeLightbox=function(){document.getElementById("lightbox").classList.remove("open");};
+
+// ── PROFILE ──
+window.openProfile=function(){document.getElementById("profileModal").classList.add("open");};
+
+// ── UTILS ──
+function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>");}
+window.dismissGroupOverlay=function(e){
+  if(e.target===document.getElementById("groupOverlay"))
+    document.getElementById("groupOverlay").classList.add("hidden");
+};
+</script>
+</body>
+</html>
