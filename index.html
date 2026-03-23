@@ -76,6 +76,8 @@ body::before{
 .header-title{font-family:"Unbounded",sans-serif;font-size:13px;font-weight:600;line-height:1.2}
 .header-sub{font-size:11px;color:var(--text2);margin-top:1px}
 .header-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.made-by{display:flex;flex-direction:column;align-items:flex-end;gap:0}
+.made-by-label{font-size:8px;color:var(--text3);line-height:1}
 .admin-badge{
   background:linear-gradient(135deg,var(--accent),var(--accent2));
   color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;display:none;
@@ -535,7 +537,10 @@ textarea:focus{border-color:var(--accent)}
   <div class="header-right">
     <div class="admin-badge" id="adminBadge">Адмін</div>
     <button class="icon-btn" onclick="openGroupChange()" title="Підгрупа">👥</button>
-    <button class="icon-btn" id="adminBtn" onclick="openAdminLogin()">🔐</button>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:1px">
+      <button class="icon-btn" id="adminBtn" onclick="openAdminLogin()">🔐</button>
+      <span style="font-size:7px;color:var(--text3);line-height:1;text-align:center;letter-spacing:0.2px">made by claude</span>
+    </div>
   </div>
 </div>
 
@@ -965,9 +970,7 @@ function renderHW(){
     // Schedule link button
     const schBtn=document.createElement("button");
     schBtn.className="sch-link-btn";
-    const sd=schData[dk+"_"+i]||{};
-    const schInfo=sd.teacher||sd.room?(sd.teacher?"👤 "+sd.teacher+" ":"")+(sd.room?"🚪 каб. "+sd.room:""):"Переглянути в розкладі";
-    schBtn.innerHTML="<span>📅</span><span>"+schInfo+"</span>";
+    schBtn.innerHTML="<span>📅</span><span>Переглянути в розкладі</span>";
     schBtn.onclick=function(e2){
       e2.stopPropagation();
       schSelDay=selDay;
@@ -1159,7 +1162,7 @@ function renderBells(){
   document.getElementById("bellsContent").innerHTML=BELLS.map((b,i)=>`
     <div class="bell-card" style="animation:fadeInUp .3s ${i*0.04}s both">
       <div class="bell-num">${i+1}</div>
-      <div><div class="bell-range">${b.s} – ${b.e}</div><div class="bell-dur">Перерва: ${breaks[i]}</div></div>
+      <div><div class="bell-range">${b.s} – ${b.e}</div></div>
     </div>`).join("");
 }
 
