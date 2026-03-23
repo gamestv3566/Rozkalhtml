@@ -2,11 +2,8 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="theme-color" content="#0a0c12">
-<meta name="color-scheme" content="dark">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Щоденник 9-А</title>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -69,11 +66,11 @@ body::before{
 .icon-btn:active{background:rgba(255,255,255,0.14)}
 
 /* Transparent system nav bar */
-html{background:transparent}body{background:var(--bg)}
+html,body{background:var(--bg)}
 /* BOTTOM NAV - liquid glass */
 .bottom-nav{
   position:fixed;
-  bottom:calc(12px + env(safe-area-inset-bottom, 0px));
+  bottom:16px;
   left:50%;transform:translateX(-50%);
   z-index:200;
   background:rgba(16,18,28,0.75);
@@ -148,7 +145,7 @@ html{background:transparent}body{background:var(--bg)}
 .today-fab:active{transform:scale(0.9)}
 
 /* CONTENT */
-.content{padding:10px 14px calc(110px + env(safe-area-inset-bottom,0px));position:relative;z-index:1}
+.content{padding:10px 14px 120px;position:relative;z-index:1}
 
 /* HW CARD */
 .hw-card{
@@ -312,7 +309,7 @@ html{background:transparent}body{background:var(--bg)}
   backdrop-filter:blur(32px) saturate(1.5);-webkit-backdrop-filter:blur(32px) saturate(1.5);
   border:1px solid var(--glass-border);border-top:1px solid rgba(255,255,255,0.2);
   border-radius:24px 24px 0 0;
-  padding:20px 20px calc(80px + env(safe-area-inset-bottom,0px));
+  padding:20px 20px 80px;
   width:100%;max-height:90vh;overflow-y:auto;
   animation:slideUp .32s cubic-bezier(.4,0,.2,1);
   touch-action:pan-y;
@@ -394,7 +391,8 @@ textarea:focus{border-color:var(--accent)}
 .spinner{width:32px;height:32px;border:3px solid rgba(255,255,255,0.1);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .empty{text-align:center;padding:40px;color:var(--text3);font-size:14px;position:relative;z-index:1}
-.tab-content{display:none;position:relative;z-index:1}
+.tab-wrapper{position:relative;overflow:hidden}
+.tab-content{display:none;position:relative;z-index:1;width:100%}
 .tab-content.active{display:block}
 .hw-content-wrap{animation:fadeSlideIn .26s cubic-bezier(.4,0,.2,1)}
 @keyframes fadeSlideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
@@ -445,6 +443,7 @@ textarea:focus{border-color:var(--accent)}
 </div>
 
 <!-- TAB CONTENTS -->
+<div class="tab-wrapper">
 <div class="tab-content active" id="tab-hw">
   <div class="week-nav">
     <button class="week-arrow" onclick="changeWeek(-1)">‹</button>
@@ -463,6 +462,7 @@ textarea:focus{border-color:var(--accent)}
 <div class="tab-content" id="tab-bells">
   <div class="content" id="bellsContent"></div>
 </div>
+</div><!-- /tab-wrapper -->
 
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav">
@@ -651,7 +651,7 @@ window.selectGroup=function(g){
   document.getElementById("groupOverlay").classList.add("hidden");
   updateHeaderSub();renderHW();
 };
-window.openGroupChange=function(){document.getElementById("groupChangeModal").classList.add("open");};
+window.openGroupChange=function(){document.getElementById("groupChangeModal").classList.add("open");if(window.attachSwipeToModal)attachSwipeToModal(document.querySelector("#groupChangeModal .modal"));};
 function updateHeaderSub(){
   document.getElementById("headerSub").textContent=userGroup?`9-А · ${userGroup}`:"9-А клас";
 }
@@ -799,7 +799,7 @@ window.openEditHW=function(dk,i,name,hw){
   document.getElementById("editModalTitle").textContent=`ДЗ: ${name}`;
   document.getElementById("hwTextInput").value=hw.text||"";
   renderPhotoPreview();
-  document.getElementById("editModal").classList.add("open");
+  document.getElementById("editModal").classList.add("open");if(window.attachSwipeToModal)attachSwipeToModal(document.querySelector("#editModal .modal"));
 };
 window.handleFiles=function(e){
   Array.from(e.target.files).forEach(f=>{const r=new FileReader();r.onload=ev=>{pendingPhotos.push(ev.target.result);renderPhotoPreview();};r.readAsDataURL(f);});
@@ -832,7 +832,7 @@ function openDayNote(dk,dn){
   dayNotePhotos=(dn.photos||[]).slice();
   document.getElementById("dayNoteInput").value=dn.text||"";
   renderDayNotePhotos();
-  document.getElementById("dayNoteModal").classList.add("open");
+  document.getElementById("dayNoteModal").classList.add("open");if(window.attachSwipeToModal)attachSwipeToModal(document.querySelector("#dayNoteModal .modal"));
 }
 window.handleDayNoteFiles=function(e){
   Array.from(e.target.files).forEach(f=>{const r=new FileReader();r.onload=ev=>{dayNotePhotos.push(ev.target.result);renderDayNotePhotos();};r.readAsDataURL(f);});
@@ -941,40 +941,44 @@ const TAB_ORDER=["hw","schedule","bells"];
 let currentTab="hw";
 window.switchTab=function(name){
   if(name===currentTab){
-    // Re-tap current tab: go to today for hw
     if(name==="hw"){goToToday();}
     return;
   }
   const oldIdx=TAB_ORDER.indexOf(currentTab);
   const newIdx=TAB_ORDER.indexOf(name);
   const goRight=newIdx>oldIdx;
+  const oldTab=document.getElementById("tab-"+currentTab);
+  const newTab=document.getElementById("tab-"+name);
 
-  const oldTab=document.getElementById(`tab-${currentTab}`);
-  const newTab=document.getElementById(`tab-${name}`);
-
-  // Animate out old
-  oldTab.style.transition="opacity .2s,transform .2s cubic-bezier(.4,0,.2,1)";
-  oldTab.style.opacity="0";
-  oldTab.style.transform=`translateX(${goRight?"-30px":"30px"})`;
-  setTimeout(()=>{
-    oldTab.classList.remove("active");
-    oldTab.style.transition="";oldTab.style.opacity="";oldTab.style.transform="";
-  },200);
-
-  // Animate in new
-  newTab.style.transition="none";
+  // Step 1: show new tab hidden behind
+  newTab.style.display="block";
+  newTab.style.position="absolute";
+  newTab.style.top="0";newTab.style.left="0";newTab.style.right="0";
   newTab.style.opacity="0";
-  newTab.style.transform=`translateX(${goRight?"30px":"-30px"})`;
-  newTab.classList.add("active");
+  newTab.style.transform="translateX("+(goRight?"40px":"-40px")+")";
+  newTab.style.transition="none";
+
+  // Step 2: animate both
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    newTab.style.transition="opacity .25s,transform .25s cubic-bezier(.4,0,.2,1)";
+    // out
+    oldTab.style.transition="opacity .22s ease,transform .22s ease";
+    oldTab.style.opacity="0";
+    oldTab.style.transform="translateX("+(goRight?"-40px":"40px")+")";
+    // in
+    newTab.style.transition="opacity .22s ease,transform .22s ease";
     newTab.style.opacity="1";
     newTab.style.transform="translateX(0)";
-    setTimeout(()=>{newTab.style.transition="";newTab.style.opacity="";newTab.style.transform="";},260);
+
+    setTimeout(()=>{
+      oldTab.classList.remove("active");
+      oldTab.style.cssText="";
+      newTab.classList.add("active");
+      newTab.style.cssText="";
+    },230);
   }));
 
   TAB_ORDER.forEach(n=>{
-    document.getElementById(`nav-${n}`).classList.toggle("active",n===name);
+    document.getElementById("nav-"+n).classList.toggle("active",n===name);
   });
   currentTab=name;
   if(name==="schedule"){buildSchDayTabs();renderScheduleDay();}
@@ -984,7 +988,7 @@ window.switchTab=function(name){
 window.openAdminLogin=function(){
   document.getElementById("passInput").value="";
   document.getElementById("passError").style.display="none";
-  document.getElementById("loginModal").classList.add("open");
+  document.getElementById("loginModal").classList.add("open");if(window.attachSwipeToModal)attachSwipeToModal(document.querySelector("#loginModal .modal"));
   if(isAdmin)showAdminStats();
 };
 window.tryLogin=function(){
@@ -1029,6 +1033,14 @@ async function showAdminStats(){
 
 // ── MODALS ──
 window.closeOutside=function(e,id){if(e.target===document.getElementById(id))closeModal(id);};
+
+// Re-attach swipe every time a modal opens
+const _origAddOpen=Element.prototype.classList;
+function openModal(id){
+  const el=document.getElementById(id);
+  el.classList.add("open");
+  attachSwipeToModal(el.querySelector(".modal"));
+}
 window.closeModal=function(id){
   const overlay=document.getElementById(id);
   const modal=overlay.querySelector(".modal");
@@ -1111,6 +1123,15 @@ window.closeModal=function(id){
   }
   document.addEventListener("DOMContentLoaded",attachSwipe);
   setTimeout(attachSwipe,500);
+  window.attachSwipeToModal=function(modal){
+    if(!modal)return;
+    modal.removeEventListener("touchstart",onTouchStart);
+    modal.removeEventListener("touchmove",onTouchMove);
+    modal.removeEventListener("touchend",onTouchEnd);
+    modal.addEventListener("touchstart",onTouchStart,{passive:true});
+    modal.addEventListener("touchmove",onTouchMove,{passive:true});
+    modal.addEventListener("touchend",onTouchEnd,{passive:true});
+  };
 })();
 
 // ── LIGHTBOX ──
@@ -1118,7 +1139,7 @@ window.openLightbox=function(src){document.getElementById("lightboxImg").src=src
 window.closeLightbox=function(){document.getElementById("lightbox").classList.remove("open");};
 
 // ── PROFILE ──
-window.openProfile=function(){document.getElementById("profileModal").classList.add("open");};
+window.openProfile=function(){document.getElementById("profileModal").classList.add("open");if(window.attachSwipeToModal)attachSwipeToModal(document.querySelector("#profileModal .modal"));};
 
 // ── UTILS ──
 function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>");}
