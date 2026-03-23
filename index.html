@@ -96,7 +96,7 @@ html,body{background:var(--bg)}
 /* BOTTOM NAV - liquid glass */
 .bottom-nav{
   position:fixed;
-  bottom:calc(24px + var(--tg-bottom, 0px));
+  bottom:calc(16px + var(--tg-bottom, env(safe-area-inset-bottom, 0px)));
   left:50%;transform:translateX(-50%);
   z-index:200;
   background:rgba(14,16,26,0.88);
@@ -108,10 +108,11 @@ html,body{background:var(--bg)}
   display:flex;gap:2px;
   box-shadow:0 8px 40px rgba(0,0,0,0.6),0 1px 0 rgba(255,255,255,0.12) inset,0 0 0 1px rgba(255,255,255,0.06);
 }
-/* Bottom fade for Telegram context */
+/* Bottom fade for Telegram Mini App */
 body::after{
-  content:"";position:fixed;bottom:0;left:0;right:0;height:90px;
-  background:linear-gradient(to top,rgba(10,12,18,0.95) 0%,transparent 100%);
+  content:"";position:fixed;bottom:0;left:0;right:0;
+  height:calc(80px + var(--tg-bottom, 0px));
+  background:linear-gradient(to top,rgba(10,12,18,1) 0%,rgba(10,12,18,0.7) 50%,transparent 100%);
   z-index:199;pointer-events:none;
 }
 .nav-item{
@@ -177,7 +178,7 @@ body::after{
 .today-fab:active{transform:scale(0.9)}
 
 /* CONTENT */
-.content{padding:10px 14px calc(140px + var(--tg-bottom, 0px));position:relative;z-index:1}
+.content{padding:10px 14px calc(130px + var(--tg-bottom, env(safe-area-inset-bottom, 0px)));position:relative;z-index:1}
 
 /* HW CARD */
 .hw-card{
@@ -229,7 +230,7 @@ body::after{
   padding:11px 13px;font-size:14px;line-height:1.65;
   white-space:pre-wrap;word-break:break-word;
 }
-.hw-empty{font-size:13px;color:var(--text3);font-style:italic;padding:4px 0 8px;display:block}
+.hw-empty{font-size:13px;color:var(--text3);font-style:italic;padding:8px 0 4px;display:block;white-space:normal;word-break:break-word;}
 .hw-photos{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:8px}
 .hw-photo{aspect-ratio:1;border-radius:var(--radius-sm);object-fit:cover;width:100%;cursor:pointer}
 .edit-btn{
@@ -332,22 +333,30 @@ body::after{
 .stat-label{font-size:12px;color:var(--text2);margin-top:4px}
 
 /* MODALS */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300;display:none;align-items:flex-end;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;display:none;align-items:flex-end;backdrop-filter:blur(16px) saturate(1.4);-webkit-backdrop-filter:blur(16px) saturate(1.4)}
 .overlay.open{display:flex}
-.overlay.open{display:flex}
+
 .modal{
-  background:rgba(18,20,30,0.94);
-  backdrop-filter:blur(32px) saturate(1.5);-webkit-backdrop-filter:blur(32px) saturate(1.5);
-  border:1px solid var(--glass-border);border-top:1px solid rgba(255,255,255,0.2);
-  border-radius:24px 24px 0 0;
+  background:rgba(12,15,25,0.72);
+  backdrop-filter:blur(48px) saturate(1.8) brightness(1.1);
+  -webkit-backdrop-filter:blur(48px) saturate(1.8) brightness(1.1);
+  border:1px solid rgba(255,255,255,0.18);
+  border-top:1px solid rgba(255,255,255,0.32);
+  border-radius:28px 28px 0 0;
   padding:20px 20px calc(80px + var(--tg-bottom, 0px));
   width:100%;max-height:min(90vh,90dvh);overflow-y:auto;
   animation:slideUp .32s cubic-bezier(.4,0,.2,1);
   touch-action:pan-y;
+  box-shadow:0 -8px 40px rgba(0,0,0,0.4),0 0 80px rgba(91,143,255,0.08) inset,0 1px 0 rgba(255,255,255,0.25) inset;
+  position:relative;
+}
+.modal::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(ellipse 120% 60% at 50% 0%,rgba(255,255,255,0.07) 0%,transparent 60%);
 }
 @keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
 @keyframes fadeInScale{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
-.modal-handle{width:40px;height:4px;border-radius:2px;background:rgba(255,255,255,0.15);margin:0 auto 18px}
+.modal-handle{width:44px;height:5px;border-radius:3px;background:rgba(255,255,255,0.22);margin:0 auto 18px;box-shadow:0 1px 4px rgba(0,0,0,0.3)}
 .modal-title{font-family:"Unbounded",sans-serif;font-size:15px;font-weight:600;margin-bottom:14px}
 .modal-label{font-size:12px;color:var(--text2);margin-bottom:5px;margin-top:12px;font-weight:500}
 textarea{
@@ -393,24 +402,43 @@ textarea:focus{border-color:var(--accent)}
 #fileInput,#dayNoteFile{display:none}
 
 /* GROUP OVERLAY */
-.group-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.group-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(20px) saturate(1.6);-webkit-backdrop-filter:blur(20px) saturate(1.6)}
 .group-overlay.hidden{display:none}
 .group-modal{
-  background:rgba(18,20,30,0.92);backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);
-  border:1px solid var(--glass-border);
-  border-radius:24px;padding:28px 24px;width:calc(100% - 48px);max-width:340px;text-align:center;
+  background:rgba(12,15,25,0.72);
+  backdrop-filter:blur(48px) saturate(1.8) brightness(1.1);
+  -webkit-backdrop-filter:blur(48px) saturate(1.8) brightness(1.1);
+  border:1px solid rgba(255,255,255,0.18);
+  border-top:1px solid rgba(255,255,255,0.32);
+  box-shadow:0 8px 60px rgba(0,0,0,0.5),0 0 80px rgba(91,143,255,0.08) inset,0 1px 0 rgba(255,255,255,0.2) inset;
+  border-radius:28px;padding:28px 24px;width:calc(100% - 48px);max-width:340px;text-align:center;
+  position:relative;
 }
+.group-modal::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(ellipse 120% 60% at 50% 0%,rgba(255,255,255,0.07) 0%,transparent 60%);
+}
+.group-close-btn{
+  position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;
+  background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);
+  color:var(--text2);font-size:14px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  z-index:1;transition:background .2s;
+}
+.group-close-btn:active{background:rgba(255,255,255,0.2)}
 .group-title{font-family:"Unbounded",sans-serif;font-size:16px;font-weight:700;margin-bottom:6px}
 .group-sub{font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.5}
 .group-btns{display:flex;gap:10px}
 .group-btn{
   flex:1;padding:16px;border-radius:var(--radius-sm);
-  border:1px solid var(--glass-border);
-  background:rgba(255,255,255,0.07);
+  border:1px solid rgba(255,255,255,0.15);
+  background:rgba(255,255,255,0.08);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
   color:var(--text);font-family:"Unbounded",sans-serif;font-size:13px;font-weight:600;cursor:pointer;
   transition:all .2s;
 }
-.group-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(91,143,255,0.1)}
+.group-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(91,143,255,0.12)}
 
 /* LIGHTBOX */
 .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:400;display:none;align-items:center;justify-content:center}
@@ -447,8 +475,9 @@ textarea:focus{border-color:var(--accent)}
 <body>
 
 <!-- GROUP SELECT -->
-<div class="group-overlay" id="groupOverlay">
+<div class="group-overlay" id="groupOverlay" onclick="maybeCloseGroup(event)">
   <div class="group-modal" style="position:relative">
+    <button class="group-close-btn" id="groupCloseBtn" style="display:none" onclick="document.getElementById('groupOverlay').classList.add('hidden')">✕</button>
     <div class="group-title" style="margin-bottom:6px">📚 Вибери підгрупу</div>
     <div class="group-sub">Для правильного відображення<br>розкладу уроків</div>
     <div class="group-btns">
@@ -458,6 +487,7 @@ textarea:focus{border-color:var(--accent)}
     <div id="groupSkipRow" style="display:none;text-align:center;margin-top:14px">
       <span onclick="document.getElementById('groupOverlay').classList.add('hidden')" style="font-size:13px;color:var(--text2);cursor:pointer;text-decoration:underline">Пропустити / Закрити</span>
     </div>
+    <div id="groupCloseRow" style="display:none"></div>
   </div>
 </div>
 
@@ -672,12 +702,14 @@ let dayNoteData={};
 if(!userGroup){
   document.getElementById("groupOverlay").classList.remove("hidden");
   document.getElementById("groupSkipRow").style.display="block";
+  document.getElementById("groupCloseBtn").style.display="flex";
 } else {
   document.getElementById("groupOverlay").classList.add("hidden");
 }
 // When opened from settings (user already has group), show close option
 window.openGroupChange=function(){
   document.getElementById("groupOverlay").classList.remove("hidden");
+  document.getElementById("groupCloseBtn").style.display="flex";
   document.getElementById("groupCloseRow").style.display="block";
 };
 updateHeaderSub();
@@ -1104,8 +1136,9 @@ window.closeModal=function(id){
   if(modal){
     modal.style.transition="transform .25s cubic-bezier(.4,0,1,1)";
     modal.style.transform="translateY(105%)";
-    overlay.style.transition="background .25s";
+    overlay.style.transition="background .25s,backdrop-filter .25s";
     overlay.style.background="rgba(0,0,0,0)";
+    overlay.style.backdropFilter="blur(0px)";
     setTimeout(()=>{
       overlay.classList.remove("open");
       modal.style.cssText="";overlay.style.cssText="";
@@ -1115,165 +1148,28 @@ window.closeModal=function(id){
   }
 };
 
-// Swipe-down to close modals
+// ── SINGLE SWIPE-DOWN TO CLOSE MODALS (consolidated, no duplicates) ──
 (function(){
-  var startY=0,curDY=0,dragging=false,dragModal=null,dragOverlay=null;
-
-  document.addEventListener('touchstart',function(e){
-    // Find closest .modal ancestor
-    var el=e.target,modal=null;
-    while(el){if(el.classList&&el.classList.contains('modal')){modal=el;break;}el=el.parentElement;}
-    if(!modal)return;
-    // Find overlay parent
-    var ov=modal.parentElement;
-    while(ov&&!(ov.classList&&ov.classList.contains('overlay')))ov=ov.parentElement;
-    if(!ov||!ov.classList.contains('open'))return;
-    startY=e.touches[0].clientY;
-    curDY=0;dragging=false;
-    dragModal=modal;dragOverlay=ov;
-    modal.style.transition='none';
-  },{passive:true});
-
-  document.addEventListener('touchmove',function(e){
-    if(!dragModal)return;
-    var dy=e.touches[0].clientY-startY;
-    if(dy<=0){dragModal=null;dragOverlay=null;return;}
-    // Only drag if at top of scroll or small scroll
-    if(!dragging&&dragModal.scrollTop>10){dragModal=null;dragOverlay=null;return;}
-    dragging=true;curDY=dy;
-    dragModal.style.transform='translateY('+dy+'px)';
-    var opacity=Math.max(0,0.55*(1-dy/300));
-    dragOverlay.style.background='rgba(0,0,0,'+opacity+')';
-    dragOverlay.style.backdropFilter='blur('+(10*(1-dy/300))+'px)';
-  },{passive:true});
-
-  document.addEventListener('touchend',function(e){
-    if(!dragModal)return;
-    if(dragging&&curDY>75){
-      var m=dragModal,ov=dragOverlay;
-      m.style.transition='transform .25s cubic-bezier(.4,0,1,1)';
-      m.style.transform='translateY(105%)';
-      ov.style.transition='background .25s,backdrop-filter .25s';
-      ov.style.background='rgba(0,0,0,0)';
-      ov.style.backdropFilter='blur(0px)';
-      setTimeout(function(){
-        ov.classList.remove('open');
-        m.style.cssText='';ov.style.cssText='';
-      },260);
-    } else if(dragModal){
-      dragModal.style.transition='transform .22s cubic-bezier(.4,0,.2,1)';
-      dragModal.style.transform='';
-      if(dragOverlay){dragOverlay.style.background='';dragOverlay.style.backdropFilter='';}
-      setTimeout(function(){if(dragModal)dragModal.style.transition='';},230);
-    }
-    dragModal=null;dragOverlay=null;dragging=false;curDY=0;
-  },{passive:true});
-})();
-
-
-// ── MODALS ──
-window.closeOutside=function(e,id){if(e.target===document.getElementById(id))closeModal(id);};
-window.closeModal=function(id){
-  const overlay=document.getElementById(id);
-  const modal=overlay.querySelector(".modal");
-  if(modal){
-    modal.style.transition="transform .25s cubic-bezier(.4,0,1,1)";
-    modal.style.transform="translateY(105%)";
-    overlay.style.transition="background .25s";
-    overlay.style.background="rgba(0,0,0,0)";
-    setTimeout(()=>{
-      overlay.classList.remove("open");
-      modal.style.cssText="";overlay.style.cssText="";
-    },260);
-  } else {
-    overlay.classList.remove("open");
-  }
-};
-
-// Swipe-down to close modals
-(function(){
-  var sy=0,dy=0,active=null,aov=null,moving=false;
-  function getModal(el){
-    var m=el;
-    while(m&&!m.classList.contains("modal"))m=m.parentElement;
-    return m;
-  }
-  document.addEventListener("touchstart",function(e){
-    var m=getModal(e.target);
-    if(!m)return;
-    var ov=m.parentElement;
-    if(!ov||!ov.classList.contains("overlay")||!ov.classList.contains("open"))return;
-    if(m.scrollTop>0)return; // don't intercept if scrolled
-    sy=e.touches[0].clientY;
-    active=m;aov=ov;moving=false;
-    m.style.transition="none";
-  },{passive:true});
-  document.addEventListener("touchmove",function(e){
-    if(!active)return;
-    dy=e.touches[0].clientY-sy;
-    if(dy<0){active=null;return;} // upward = cancel
-    if(dy>5){
-      moving=true;
-      active.style.transform="translateY("+dy+"px)";
-      var op=Math.max(0,0.55*(1-dy/280));
-      aov.style.background="rgba(0,0,0,"+op+")";
-    }
-  },{passive:true});
-  document.addEventListener("touchend",function(e){
-    if(!active)return;
-    if(moving&&dy>80){
-      var m=active,ov=aov;
-      m.style.transition="transform .24s ease";
-      m.style.transform="translateY(110%)";
-      ov.style.transition="background .24s";
-      ov.style.background="rgba(0,0,0,0)";
-      setTimeout(function(){
-        ov.classList.remove("open");
-        ov.style.cssText="";
-        m.style.cssText="";
-      },250);
-    } else {
-      active.style.transition="transform .2s ease";
-      active.style.transform="";
-      aov.style.background="";
-      setTimeout(function(){if(active)active.style.transition="";},200);
-    }
-    active=null;aov=null;moving=false;dy=0;
-  },{passive:true});
-})();
-
-// ── MODALS ──
-window.closeOutside=function(e,id){if(e.target===document.getElementById(id))closeModal(id);};
-window.closeModal=function(id){
-  const overlay=document.getElementById(id);
-  const modal=overlay.querySelector(".modal");
-  if(modal){
-    modal.style.transition="transform .25s cubic-bezier(.4,0,1,1)";
-    modal.style.transform="translateY(105%)";
-    overlay.style.transition="background .25s";
-    overlay.style.background="rgba(0,0,0,0)";
-    setTimeout(()=>{
-      overlay.classList.remove("open");
-      modal.style.cssText="";overlay.style.cssText="";
-    },260);
-  } else {
-    overlay.classList.remove("open");
-  }
-};
-
-// Swipe-down to close modals — simple handle-based approach
-(function(){
-  // Swipe anywhere in modal (not just handle)
   let startY=0,startX=0,modal=null,overlay=null,dragging=false;
 
+  function getModal(el){
+    let m=el;
+    while(m){
+      if(m.classList&&m.classList.contains("modal"))return m;
+      m=m.parentElement;
+    }
+    return null;
+  }
+
   document.addEventListener("touchstart",function(e){
-    // Must touch inside an open modal
-    const m=e.target.closest(".overlay.open .modal");
+    const m=getModal(e.target);
     if(!m)return;
-    // Only allow swipe-down when scrolled to top
-    if(m.scrollTop>2)return;
+    const ov=m.closest(".overlay");
+    if(!ov||!ov.classList.contains("open"))return;
+    // Only start swipe when modal is scrolled to very top
+    if(m.scrollTop>4)return;
     modal=m;
-    overlay=m.closest(".overlay");
+    overlay=ov;
     startY=e.touches[0].clientY;
     startX=e.touches[0].clientX;
     dragging=false;
@@ -1285,23 +1181,28 @@ window.closeModal=function(id){
     const dy=e.touches[0].clientY-startY;
     const dx=Math.abs(e.touches[0].clientX-startX);
     if(!dragging){
+      // Must be more vertical than horizontal
       if(dy>8&&dy>dx*1.5){dragging=true;}
-      else if(dx>12){modal=null;return;}
+      else if(dx>12||dy<-8){modal=null;overlay=null;return;}
     }
-    if(!dragging)return;
-    const pull=Math.max(0,dy);
-    modal.style.transform="translateY("+pull+"px)";
-    if(overlay)overlay.style.background="rgba(0,0,0,"+Math.max(0,0.55*(1-pull/260))+")";
+    if(!dragging||dy<=0)return;
+    modal.style.transform="translateY("+dy+"px)";
+    if(overlay){
+      const op=Math.max(0,0.45*(1-dy/280));
+      const bl=Math.max(0,16*(1-dy/280));
+      overlay.style.background="rgba(0,0,0,"+op+")";
+      overlay.style.backdropFilter="blur("+bl+"px)";
+    }
   },{passive:true});
 
   document.addEventListener("touchend",function(e){
     if(!modal||!dragging){modal=null;overlay=null;dragging=false;return;}
     const dy=e.changedTouches[0].clientY-startY;
     if(dy>90){
-      modal.style.transition="transform .24s cubic-bezier(.4,0,.2,1)";
-      modal.style.transform="translateY(110%)";
-      if(overlay){overlay.style.transition="background .24s";overlay.style.background="rgba(0,0,0,0)";}
       const _m=modal,_o=overlay;
+      _m.style.transition="transform .24s cubic-bezier(.4,0,.2,1)";
+      _m.style.transform="translateY(110%)";
+      if(_o){_o.style.transition="background .24s,backdrop-filter .24s";_o.style.background="rgba(0,0,0,0)";_o.style.backdropFilter="blur(0px)";}
       setTimeout(()=>{
         if(_o){_o.classList.remove("open");_o.style.cssText="";}
         _m.style.cssText="";
@@ -1309,8 +1210,9 @@ window.closeModal=function(id){
     } else {
       modal.style.transition="transform .22s cubic-bezier(.34,1.56,.64,1)";
       modal.style.transform="";
-      if(overlay)overlay.style.background="";
-      setTimeout(()=>{if(modal)modal.style.transition="";},230);
+      if(overlay){overlay.style.background="";overlay.style.backdropFilter="";}
+      const _m=modal;
+      setTimeout(()=>{if(_m)_m.style.transition="";},230);
     }
     modal=null;overlay=null;dragging=false;
   },{passive:true});
@@ -1318,6 +1220,40 @@ window.closeModal=function(id){
   window.attachSwipeToModal=function(){};
 })();
 
+// ── TAB HORIZONTAL SWIPE (only on tab-wrapper, not modals) ──
+(function(){
+  let sx=0,sy=0,swipeDir=null;
+  const wrapper=document.querySelector(".tab-wrapper");
+  if(!wrapper)return;
+
+  wrapper.addEventListener("touchstart",function(e){
+    // Never intercept if a modal is open
+    if(document.querySelector(".overlay.open"))return;
+    sx=e.touches[0].clientX;
+    sy=e.touches[0].clientY;
+    swipeDir=null;
+  },{passive:true});
+
+  wrapper.addEventListener("touchmove",function(e){
+    if(document.querySelector(".overlay.open"))return;
+    if(!swipeDir){
+      const dx=Math.abs(e.touches[0].clientX-sx);
+      const dy=Math.abs(e.touches[0].clientY-sy);
+      if(dx>dy*1.5&&dx>12)swipeDir="h";
+      else if(dy>dx*1.5&&dy>12)swipeDir="v";
+    }
+  },{passive:true});
+
+  wrapper.addEventListener("touchend",function(e){
+    if(document.querySelector(".overlay.open"))return;
+    if(swipeDir!=="h")return;
+    const dx=e.changedTouches[0].clientX-sx;
+    if(Math.abs(dx)<50)return;
+    const idx=TAB_ORDER.indexOf(currentTab);
+    if(dx<0&&idx<TAB_ORDER.length-1)window.switchTab(TAB_ORDER[idx+1]);
+    else if(dx>0&&idx>0)window.switchTab(TAB_ORDER[idx-1]);
+  },{passive:true});
+})();
 // ── LIGHTBOX ──
 window.openLightbox=function(src){document.getElementById("lightboxImg").src=src;document.getElementById("lightbox").classList.add("open");};
 window.closeLightbox=function(){document.getElementById("lightbox").classList.remove("open");};
@@ -1328,6 +1264,10 @@ window.openProfile=function(){document.getElementById("profileModal").classList.
 // ── UTILS ──
 function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>");}
 window.dismissGroupOverlay=function(e){
+  if(e.target===document.getElementById("groupOverlay"))
+    document.getElementById("groupOverlay").classList.add("hidden");
+};
+window.maybeCloseGroup=function(e){
   if(e.target===document.getElementById("groupOverlay"))
     document.getElementById("groupOverlay").classList.add("hidden");
 };
