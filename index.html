@@ -509,13 +509,19 @@ textarea:focus{border-color:var(--accent)}
 
 /* THURSDAY TOGGLE */
 .thu-toggle-btn{
-  padding:6px 10px;border-radius:8px;font-size:11px;font-weight:600;
+  padding:8px 10px;border-radius:12px;font-size:12px;font-weight:600;
   background:rgba(255,255,255,0.06);border:1px solid var(--glass-border);
-  color:var(--text2);cursor:pointer;font-family:inherit;transition:all .2s;
+  color:var(--text2);cursor:pointer;font-family:inherit;
+  transition:all .22s cubic-bezier(.4,0,.2,1);
+  text-align:center;line-height:1.3;
 }
+.thu-toggle-btn:active{transform:scale(0.95)}
 .thu-toggle-btn.thu-active{
-  background:rgba(91,143,255,0.18);border-color:rgba(91,143,255,0.4);color:var(--accent);
+  background:linear-gradient(135deg,rgba(91,143,255,0.22),rgba(139,111,255,0.18));
+  border-color:rgba(91,143,255,0.5);color:var(--accent);
+  box-shadow:0 0 12px rgba(91,143,255,0.2);
 }
+.thu-toggle-btn.thu-active::before{content:"";display:block}
 </style>
 </head>
 <body>
@@ -1175,11 +1181,17 @@ function renderSchDay(dk,curMin,gi){
       html+=`<div class="sch-card ${isNow?"now":""} ${isAdmin?"admin-mode":""}" data-key="${keyA}" style="animation:fadeInUp .28s ${i*0.05}s both">
         <div class="sch-num">${i+1}</div>
         <div class="sch-info">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-            <button class="thu-toggle-btn ${activeLesson===lessonA?"thu-active":""}" onclick="this.closest('.sch-card').setAttribute('data-key','${keyA}');document.querySelector('.thu-info-a').style.display='';document.querySelector('.thu-info-b').style.display='none'" style="flex:1">📍 ${lessonA}</button>
-            <button class="thu-toggle-btn ${activeLesson===lessonB?"thu-active":""}" onclick="this.closest('.sch-card').setAttribute('data-key','${keyB}');document.querySelector('.thu-info-a').style.display='none';document.querySelector('.thu-info-b').style.display=''" style="flex:1">📍 ${lessonB}</button>
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
+            <button class="thu-toggle-btn ${activeLesson===lessonA?"thu-active":""}" id="thuBtnA_${i}" onclick="thuSwitch(this,'${keyA}','${keyB}',${i})" style="flex:1">
+              ${activeLesson===lessonA?"🟢":"📅"} ${lessonA}
+              ${activeLesson===lessonA?'<span style="display:block;font-size:9px;margin-top:2px;opacity:.7">цей тиждень</span>':""}
+            </button>
+            <button class="thu-toggle-btn ${activeLesson===lessonB?"thu-active":""}" id="thuBtnB_${i}" onclick="thuSwitch(this,'${keyB}','${keyA}',${i})" style="flex:1">
+              ${activeLesson===lessonB?"🟢":"📅"} ${lessonB}
+              ${activeLesson===lessonB?'<span style="display:block;font-size:9px;margin-top:2px;opacity:.7">цей тиждень</span>':""}
+            </button>
           </div>
-          <div class="thu-info-a" style="${activeLesson!==lessonA?"display:none":""}">
+          <div class="thu-info-a" id="thuInfoA_${i}" style="${activeLesson!==lessonA?"display:none":""}">
             <div class="sch-name">${lessonA}</div>
             <div class="sch-time">${bell.s||""}–${bell.e||""}</div>
             ${sdA.teacher||sdA.room?`<div class="sch-extra">${sdA.teacher?`<span>👤 ${esc(sdA.teacher)}</span>`:""}${sdA.room?`<span>🚪 каб. ${esc(sdA.room)}</span>`:""}</div>`:""}
@@ -1189,7 +1201,7 @@ function renderSchDay(dk,curMin,gi){
               <button class="sch-save" data-key="${keyA}">Зберегти</button>
             </div>
           </div>
-          <div class="thu-info-b" style="${activeLesson!==lessonB?"display:none":""}">
+          <div class="thu-info-b" id="thuInfoB_${i}" style="${activeLesson!==lessonB?"display:none":""}">
             <div class="sch-name">${lessonB}</div>
             <div class="sch-time">${bell.s||""}–${bell.e||""}</div>
             ${sdB.teacher||sdB.room?`<div class="sch-extra">${sdB.teacher?`<span>👤 ${esc(sdB.teacher)}</span>`:""}${sdB.room?`<span>🚪 каб. ${esc(sdB.room)}</span>`:""}</div>`:""}
@@ -1458,6 +1470,25 @@ window.closeModal=function(id){
 })();
 
 
+
+// ── THURSDAY TOGGLE ──
+window.thuSwitch=function(btn,activeKey,inactiveKey,idx){
+  // Swap active button style
+  var card=btn.closest(".sch-card");
+  card.setAttribute("data-key",activeKey);
+  card.querySelectorAll(".thu-toggle-btn").forEach(b=>b.classList.remove("thu-active"));
+  btn.classList.add("thu-active");
+  // Show/hide info
+  var infoA=document.getElementById("thuInfoA_"+idx);
+  var infoB=document.getElementById("thuInfoB_"+idx);
+  if(infoA&&infoB){
+    var showA=activeKey.includes("Географія");
+    infoA.style.display=showA?"":"none";
+    infoA.style.animation=showA?"fadeInUp .2s both":"";
+    infoB.style.display=showA?"none":"";
+    infoB.style.animation=showA?"":"fadeInUp .2s both";
+  }
+};
 
 // ── BULK HW IMPORT ──
 const DAYS_MAP={
