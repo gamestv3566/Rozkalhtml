@@ -681,7 +681,7 @@ textarea:focus{border-color:var(--accent)}
 <div class="overlay" id="loginModal" onclick="closeOutside(event,'loginModal')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">🔐 Вхід адміна</div>
+    <div class="modal-title" id="loginModalTitle">🔐 Вхід адміна</div>
     <div class="modal-label">Пароль</div>
     <input class="m-input" type="password" id="passInput" placeholder="••••••" maxlength="30" onkeydown="if(event.key==='Enter')tryLogin()">
     <div class="m-error" id="passError">Неправильний пароль</div>
@@ -697,7 +697,7 @@ textarea:focus{border-color:var(--accent)}
       </div>
       <div id="passChangeMsg" style="font-size:12px;margin-top:6px;display:none"></div>
     </div>
-    <div style="text-align:center;margin-top:12px">
+    <div id="logoutRow" style="text-align:center;margin-top:12px;display:none">
       <span style="font-size:12px;color:var(--text3);cursor:pointer" onclick="logout()">Вийти з адміна</span>
     </div>
   </div>
@@ -940,8 +940,10 @@ onValue(ref(db,"daynote"),snap=>{dayNoteData=snap.val()||{};renderHW();});
 onValue(ref(db,"config/thursday"),snap=>{
   if(snap.exists()){window._thuEven=snap.val().even||"Географія";}
   else{window._thuEven="Географія";}
-  // Перемалювати якщо відкрита вкладка розкладу
+  // Перемалювати обидві вкладки після зміни
   if(currentTab==="schedule")renderScheduleDay();
+  if(currentTab==="hw")renderHW();
+  updateThuAdminUI();
 });
 
 // Підвантажити підгрупу і конфіг
@@ -1463,6 +1465,10 @@ window.openAdminLogin=function(){
   document.getElementById("loginModal").classList.add("open");
   if(isAdmin)showAdminStats();
 };
+window.openAdminPanel=function(){
+  document.getElementById("loginModal").classList.add("open");
+  showAdminStats();
+};
 window.tryLogin=function(){
   const val=document.getElementById("passInput").value;
   if(val===ADMIN_PASS){
@@ -1476,14 +1482,33 @@ window.tryLogin=function(){
 };
 window.logout=function(){
   isAdmin=false;localStorage.removeItem("isAdmin9a");
-  applyAdminUI();closeModal("loginModal");renderHW();
+  applyAdminUI();
+  // Відновити вигляд loginModal
+  const titleEl=document.getElementById("loginModalTitle");
+  if(titleEl)titleEl.textContent="🔐 Вхід адміна";
+  const passEl=document.querySelector("#loginModal .m-input");
+  if(passEl)passEl.style.display="";
+  const loginBtnRow=document.querySelector("#loginModal .modal-actions");
+  if(loginBtnRow)loginBtnRow.style.display="";
+  document.getElementById("adminStatsArea").style.display="none";
+  closeModal("loginModal");renderHW();
 };
 function applyAdminUI(){
   document.getElementById("adminBadge").classList.toggle("on",isAdmin);
   document.getElementById("adminBtn").textContent=isAdmin?"✅":"🔐";
+  const lr=document.getElementById("logoutRow");
+  if(lr)lr.style.display=isAdmin?"block":"none";
 }
 
 async function showAdminStats(){
+  const titleEl=document.getElementById("loginModalTitle");
+  if(titleEl)titleEl.textContent="🛠 Панель адміна";
+  const passEl=document.querySelector("#loginModal .m-input");
+  if(passEl)passEl.style.display="none";
+  const passErrEl=document.getElementById("passError");
+  if(passErrEl)passErrEl.style.display="none";
+  const loginBtnRow=document.querySelector("#loginModal .modal-actions");
+  if(loginBtnRow)loginBtnRow.style.display="none";
   const area=document.getElementById("adminStatsArea");
   area.style.display="block";
   area.innerHTML='<div class="loading" style="padding:20px"><div class="spinner"></div></div>';
